@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -26,4 +28,19 @@ public class EndpointHit {
     private String ip;
     @Column(name = "created", nullable = false)
     private LocalDateTime created;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
+        EndpointHit current = (EndpointHit) o;
+        return Objects.equals(app, current.app) &&
+                Objects.equals(uri, current.uri) &&
+                Objects.equals(ip, current.ip);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(app, uri, ip, created);
+    }
 }
