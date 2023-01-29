@@ -4,11 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
-@AllArgsConstructor
-public class StatDto {
-    private String app;
-    private String uri;
-    private int hits;
+
+public interface StatDto {
+     String getApp();
+     String getUri();
+     int getHits();
 }

@@ -10,6 +10,7 @@ import ru.practicum.stat.model.EndpointHit;
 import ru.practicum.stat.repository.StatRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,6 +25,9 @@ public class StatService {
     }
 
     public List<StatDto> getStat(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
-//return statRepository.findAllByUriAndCreatedBetween(uris, start, end);
+        List<StatDto> stat ;
+        if (!unique){
+             stat= statRepository.findAllByUriAndCreatedBetween(uris, start, end);
+        }
     }
 }
