@@ -12,6 +12,7 @@ import ru.practicum.stat.repository.StatRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,13 +22,25 @@ public class StatService {
 
     public EndpointHitDto saveStat(EndpointHit endpointHit) {
         log.info("Получен запрос на сохрание информации об обращении к эндпоинту {}", endpointHit.getUri());
-       return StatMapper.INSTANCE.toEndpointHitDto(statRepository.save(endpointHit));
+        return StatMapper.INSTANCE.toEndpointHitDto(statRepository.save(endpointHit));
     }
 
     public List<StatDto> getStat(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
-        List<StatDto> stat ;
-        if (!unique){
-             stat= statRepository.findAllByUriAndCreatedBetween(uris, start, end);
+        log.info("Получен запрос на получений статистики");
+        List<StatDto> stat = new ArrayList<>();
+        for (String uri : uris) {
+            List<EndpointHit> hits = statRepository.findAllByUriAndCreatedBetween(uri, start, end);
+            if (hits.size() == 0) {
+                stat.add(new StatDto("", uri, 0));
+            } else {
+                if (unique) {
+                    List<EndpointHit> returnedListEndpointHits = hits.stream().distinct().collect(Collectors.toList());
+                    stat.add(new StatDto(returnedListEndpointHits.get(0).getApp(), uri, returnedListEndpointHits.size()));
+                } else {
+                    stat.add(new StatDto(hits.get(0).getApp(), uri, hits.size()));
+                }
+            }
         }
+        return stat;
     }
 }
