@@ -1,7 +1,7 @@
-package ru.practicum.stat.client;
+package client;
 
+import org.jetbrains.annotations.Nullable;
 import org.springframework.http.*;
-import org.springframework.lang.Nullable;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.stat.model.EndpointHit;

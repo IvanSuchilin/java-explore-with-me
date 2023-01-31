@@ -1,13 +1,11 @@
-package ru.practicum.stat;
-
+import dto.EndpointHitDto;
+import dto.StatDto;
 import lombok.extern.slf4j.Slf4j;
+import model.EndpointHit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.stat.dto.EndpointHitDto;
-import ru.practicum.stat.dto.StatDto;
-import ru.practicum.stat.model.EndpointHit;
-import ru.practicum.stat.service.StatService;
+import service.StatService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +21,7 @@ public StatController (StatService statService){
         this.statService = statService;
     }
 
-   @PostMapping ("/hit")
+   @PostMapping("/hit")
     public EndpointHitDto saveStat (EndpointHit endpointHit){
         log.info("Получен запрос на сохрание информации об обращении к эндпоинту {}", endpointHit.getUri());
        return statService.saveStat(endpointHit);

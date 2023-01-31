@@ -1,10 +1,10 @@
-package ru.practicum.stat.mappers;
+package mappers;
 
+import dto.EndpointHitDto;
+import model.EndpointHit;
 import org.mapstruct.Mapper;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
-import ru.practicum.stat.dto.EndpointHitDto;
-import ru.practicum.stat.model.EndpointHit;
 
 @Mapper(componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
