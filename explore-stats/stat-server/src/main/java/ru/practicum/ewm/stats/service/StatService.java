@@ -1,13 +1,13 @@
-package service;
+package ru.practicum.ewm.stats.service;
 
 import dto.EndpointHitDto;
 import dto.StatDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import mappers.StatMapper;
-import model.EndpointHit;
+import ru.practicum.ewm.stats.mappers.StatMapper;
+import ru.practicum.ewm.stats.model.EndpointHit;
 import org.springframework.stereotype.Service;
-import repository.StatRepository;
+import ru.practicum.ewm.stats.repository.StatRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ public class StatService {
         log.info("Получен запрос на получений статистики");
         List<StatDto> stat = new ArrayList<>();
         for (String uri : uris) {
-            List<EndpointHit> hits = statRepository.findAllByUriAndCreatedBetween(uri, start, end);
+            List<EndpointHit> hits = statRepository.findAllByUriAndTimestampBetween(uri, start, end);
             if (hits.size() == 0) {
                 stat.add(new StatDto("", uri, 0));
             } else {

@@ -1,10 +1,11 @@
 package client;
 
+import dto.EndpointHitDto;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.http.*;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
-import ru.practicum.stat.model.EndpointHit;
+
 
 public class StatClient {
     protected final RestTemplate rest;
@@ -13,11 +14,11 @@ public class StatClient {
         this.rest = rest;
     }
 
-    protected ResponseEntity<Object> post(EndpointHit body) {
+    protected ResponseEntity<Object> post(EndpointHitDto body) {
         return makeAndSendRequest(HttpMethod.POST, "/hit", body);
     }
 
-    private ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable EndpointHit body) {
+    private ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable EndpointHitDto body) {
         HttpEntity requestEntity = new HttpEntity<>(body, defaultHeaders());
 
         ResponseEntity<Object> mainServerResponse;

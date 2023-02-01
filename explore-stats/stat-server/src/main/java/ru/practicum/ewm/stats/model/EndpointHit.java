@@ -1,4 +1,4 @@
-package model;
+package ru.practicum.ewm.stats.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,7 +27,7 @@ public class EndpointHit {
     @Column(nullable = false)
     private String ip;
     @Column(name = "created", nullable = false)
-    private LocalDateTime created;
+    private LocalDateTime timestamp;
 
     @Override
     public boolean equals(Object o) {
@@ -41,6 +41,6 @@ public class EndpointHit {
 
     @Override
     public int hashCode() {
-        return Objects.hash(app, uri, ip, created);
+        return Objects.hash(app, uri, ip, timestamp);
     }
 }
