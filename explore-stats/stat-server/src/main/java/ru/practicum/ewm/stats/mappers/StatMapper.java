@@ -12,5 +12,6 @@ public interface StatMapper {
     StatMapper INSTANCE = Mappers.getMapper(StatMapper.class);
 
     EndpointHitDto toEndpointHitDto(EndpointHit endpointHit);
+
     EndpointHit toEndpointHit(EndpointHitDto endpointHitDto);
 }
