@@ -11,6 +11,7 @@ import ru.practicum.ewm.stats.repository.StatRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,8 +22,9 @@ public class StatService {
     private final StatRepository statRepository;
 
     public EndpointHitDto saveStat(EndpointHit endpointHit) {
-        log.info("Получен запрос на сохрание информации об обращении к эндпоинту {}", endpointHit.getUri());
-        return StatMapper.INSTANCE.toEndpointHitDto(statRepository.save(endpointHit));
+        log.info("Получен запрос на сохрание информации об обращении к эндпоинту в сервисе {}", endpointHit.getUri());
+        EndpointHit returned = statRepository.save(endpointHit);
+        return StatMapper.INSTANCE.toEndpointHitDto(returned);
     }
 
     public List<StatDto> getStat(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
@@ -41,6 +43,6 @@ public class StatService {
                 }
             }
         }
-        return stat;
+        return stat.stream().sorted(Comparator.comparingInt(StatDto::getHits).reversed()).collect(Collectors.toList());
     }
 }

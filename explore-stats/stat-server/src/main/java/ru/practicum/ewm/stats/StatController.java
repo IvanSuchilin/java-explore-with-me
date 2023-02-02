@@ -30,16 +30,18 @@ public StatController (StatService statService){
    @PostMapping("/hit")
     public EndpointHitDto saveStat (@RequestBody @Valid EndpointHitDto endpointHit){
         log.info("Получен запрос на сохрание информации об обращении к эндпоинту в контроллере {}", endpointHit.getUri());
-       return statService.saveStat(StatMapper.INSTANCE.toEndpointHit(endpointHit));
+        EndpointHit endpointHit1 = StatMapper.INSTANCE.toEndpointHit(endpointHit);
+       EndpointHitDto returned = statService.saveStat(endpointHit1);
+       return returned;
    }
 
-    @GetMapping("/hit/stats")
+    @GetMapping("/stats")
     public List<StatDto> getStat (@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                       LocalDateTime start,
                                   @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                   LocalDateTime end,
                                   @RequestParam List<String> uris,
-                                  @RequestParam boolean unique){
+                                  @RequestParam(defaultValue = "false") boolean unique){
         log.info("Получен запрос на получение статистики в контроллере");
         return statService.getStat(start, end, uris, unique);
     }
