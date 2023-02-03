@@ -9,11 +9,11 @@ services:
     depends_on:
       - stats-db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/statsDb
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/statsDb
       - SPRING_DATASOURCE_USER=root
       - SPRING_DATASOURCE_PASSWORD=root
       - DB_NAME=statsDb
-      - DB_HOST=db
+      - DB_HOST=stats-db
         DB_PORT=5432
 
   stats-db:
