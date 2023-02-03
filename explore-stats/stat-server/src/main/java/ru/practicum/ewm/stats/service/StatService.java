@@ -23,8 +23,7 @@ public class StatService {
 
     public EndpointHitDto saveStat(EndpointHit endpointHit) {
         log.info("Получен запрос на сохрание информации об обращении к эндпоинту в сервисе {}", endpointHit.getUri());
-        EndpointHit returned = statRepository.save(endpointHit);
-        return StatMapper.INSTANCE.toEndpointHitDto(returned);
+        return StatMapper.INSTANCE.toEndpointHitDto(statRepository.save(endpointHit));
     }
 
     public List<StatDto> getStat(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
