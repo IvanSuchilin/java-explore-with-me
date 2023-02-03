@@ -36,7 +36,7 @@ public class StatClient {
 
         ResponseEntity<Object> mainServerResponse;
         try {
-            if (parameters.size() != 0){
+            if (parameters.size() != 0) {
                 mainServerResponse = rest.exchange(path, method, requestEntity, Object.class, parameters);
             } else {
                 mainServerResponse = rest.exchange(path, method, requestEntity, Object.class);
