@@ -10,10 +10,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.stats.repository.StatRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
