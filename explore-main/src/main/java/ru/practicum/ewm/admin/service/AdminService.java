@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.ewm.category.dto.CategoryDto;
+import ru.practicum.ewm.category.dto.CategoryShortDto;
 import ru.practicum.ewm.category.mappers.CategoryMapper;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
 public class AdminService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
-    private  final DtoValidator validator;
+    private final DtoValidator validator;
 
     public UserDto createUser(UserDto user) {
         validator.validateUserDto(user);
@@ -36,7 +37,7 @@ public class AdminService {
         User saveUser;
         try {
             saveUser = userRepository.save(UserMapper.INSTANCE.toUser(user));
-        } catch  (RuntimeException e) {
+        } catch (RuntimeException e) {
             throw new NameAlreadyExistException("Имя (почта) уже используется", "Не соблюдены условия уникальности имени (почты)"
                     , LocalDateTime.now());
         }
@@ -72,11 +73,11 @@ public class AdminService {
         Category stored;
         log.debug("Получен запрос на создание категории {}", category.getName());
         try {
-             stored = categoryRepository.save(CategoryMapper.INSTANCE.toCategory(category));
+            stored = categoryRepository.save(CategoryMapper.INSTANCE.toCategory(category));
         } catch (RuntimeException e) {
             throw new NameAlreadyExistException("Имя категории уже используется", "Не соблюдены условия уникальности имени"
-            , LocalDateTime.now());
-    }
+                    , LocalDateTime.now());
+        }
         return CategoryMapper.INSTANCE.toDto(stored);
     }
 
@@ -87,5 +88,22 @@ public class AdminService {
                         "Категория c id" + id + " не найдена"));
         categoryRepository.deleteById(id);
     }
+
+    public Object update(Long id, CategoryShortDto updatingDto) {
+        log.debug("Получен запрос PATCH /admin/category/{catId}");
+        Category stored = categoryRepository.findById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Категория c id" + id + " не найдена"));
+        if (updatingDto.getName() != null || !updatingDto.getName().isBlank()) {
+            if (categoryRepository.findAll().stream()
+                    .anyMatch(u -> u.getName().equals(updatingDto.getName()))) {
+                throw new NameAlreadyExistException("Имя категории уже используется", "Не соблюдены условия уникальности имени"
+                        , LocalDateTime.now());
+            }
+        }
+        CategoryMapper.INSTANCE.updateCategory(updatingDto, stored);
+        Category actualCategory = categoryRepository.save(stored);
+        return CategoryMapper.INSTANCE.toDto(actualCategory);
+        }
 
 }

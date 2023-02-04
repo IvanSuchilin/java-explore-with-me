@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.admin.service.AdminService;
 import ru.practicum.ewm.category.dto.CategoryDto;
+import ru.practicum.ewm.category.dto.CategoryShortDto;
 import ru.practicum.ewm.user.dto.UserDto;
 
 import javax.validation.constraints.Positive;
@@ -20,7 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Validated
 @RequestMapping(path = "/admin")
-public class AdminUserController {
+public class AdminController {
 
     private final AdminService adminService;
 
@@ -60,4 +61,11 @@ public class AdminUserController {
         adminService.deleteCategory(id);
         return new ResponseEntity<>(true, HttpStatus.NO_CONTENT);
     }
+
+    @PatchMapping("/categories/{catId}")
+    public ResponseEntity<Object> patch(@PathVariable("catId") Long id, @RequestBody CategoryShortDto updatingDto) {
+        log.info("Обновлеие данных категории id {}", id);
+        return new ResponseEntity<>(adminService.update(id, updatingDto), HttpStatus.OK);
+    }
+
 }
