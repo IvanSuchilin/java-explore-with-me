@@ -2,6 +2,7 @@ package ru.practicum.ewm.stats;
 
 import dto.EndpointHitDto;
 import dto.StatDto;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import ru.practicum.ewm.stats.mappers.StatMapper;
@@ -18,14 +19,10 @@ import java.util.List;
 @RestController
 @Slf4j
 @Validated
+@RequiredArgsConstructor
 @RequestMapping
 public class StatController {
     private final StatService statService;
-
-    @Autowired
-    public StatController(StatService statService) {
-        this.statService = statService;
-    }
 
     @PostMapping("/hit")
     public EndpointHitDto saveStat(@RequestBody @Valid EndpointHitDto endpointHit) {

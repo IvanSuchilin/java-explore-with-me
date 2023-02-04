@@ -9,12 +9,8 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-//public interface StatDto {
 public class StatDto {
-    /* String getApp();
-     String getUri();
-     int getHits();*/
      private String app;
      private String uri;
-     int hits;
+     private int hits;
 }
