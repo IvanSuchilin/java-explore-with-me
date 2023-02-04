@@ -28,20 +28,16 @@ public class StatService {
 
     public List<StatDto> getStat(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
         log.info("Получен запрос на получений статистики");
-        List<StatDto> stat = new ArrayList<>();
-        for (String uri : uris) {
-            List<EndpointHit> hits = statRepository.findAllByUriAndTimestampBetween(uri, start, end);
-            if (hits.size() == 0) {
-                stat.add(new StatDto("", uri, 0));
+        if (uris == null || uris.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            if (unique) {
+                return statRepository.findStatWithUnique(uris, start, end)
+                        .stream().sorted(Comparator.comparing(StatDto::getHits).reversed()).collect(Collectors.toList());
             } else {
-                if (unique) {
-                    List<EndpointHit> returnedListEndpointHits = hits.stream().distinct().collect(Collectors.toList());
-                    stat.add(new StatDto(returnedListEndpointHits.get(0).getApp(), uri, returnedListEndpointHits.size()));
-                } else {
-                    stat.add(new StatDto(hits.get(0).getApp(), uri, hits.size()));
-                }
+                return statRepository.findStatNOtUnique(uris, start, end)
+                        .stream().sorted(Comparator.comparing(StatDto::getHits).reversed()).collect(Collectors.toList());
             }
         }
-        return stat.stream().sorted(Comparator.comparingInt(StatDto::getHits).reversed()).collect(Collectors.toList());
     }
 }

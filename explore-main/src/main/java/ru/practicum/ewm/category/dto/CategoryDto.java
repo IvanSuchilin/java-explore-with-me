@@ -1,4 +1,4 @@
-package dto;
+package ru.practicum.ewm.category.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,8 +9,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StatDto {
-     private String app;
-     private String uri;
-     long hits;
+public class CategoryDto {
+    private Long id;
+    private String name;
 }

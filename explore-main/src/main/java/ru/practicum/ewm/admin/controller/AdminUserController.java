@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.admin.service.AdminService;
+import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.user.dto.UserDto;
 
 import javax.validation.constraints.Positive;
@@ -24,15 +25,15 @@ public class AdminUserController {
     private final AdminService adminService;
 
     @PostMapping("/users")
-    public ResponseEntity<Object> create(@RequestBody UserDto user) {
+    public ResponseEntity<Object> createUserByAdmin(@RequestBody UserDto user) {
         log.info("Создание пользователя {}", user.getName());
         return new ResponseEntity<>(adminService.createUser(user), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/users/{userId}")
-    public ResponseEntity<Object> delete(@Positive @PathVariable("userId") Long id) {
+    public ResponseEntity<Object> deleteUserByAdmin(@Positive @PathVariable("userId") Long id) {
         log.info("Удаление пользователя id {}", id);
-        adminService.delete(id);
+        adminService.deleteUser(id);
         return new ResponseEntity<>(true, HttpStatus.NO_CONTENT);
     }
 
@@ -45,5 +46,18 @@ public class AdminUserController {
         log.info(MessageFormat.format("Получение списка пользоветелей id: {0} с {1} пользователя и размером страницы {2}",
                 ids, from, size));
         return new ResponseEntity<>(adminService.getUsers(ids, from, size), HttpStatus.OK);
+    }
+
+    @PostMapping("/categories")
+    public ResponseEntity<Object> createCategory(@RequestBody CategoryDto category) {
+        log.info("Создание категории {}", category.getName());
+        return new ResponseEntity<>(adminService.createCategory(category), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/categories/{catId}")
+    public ResponseEntity<Object> deleteCategoryByAdmin(@Positive @PathVariable("catId") Long id) {
+        log.info("Удаление Категории id {}", id);
+        adminService.deleteCategory(id);
+        return new ResponseEntity<>(true, HttpStatus.NO_CONTENT);
     }
 }
