@@ -11,16 +11,17 @@ import java.util.List;
 
 public interface StatRepository extends JpaRepository<EndpointHit, Long> {
 
-    @Query(value = "select " +
-            "   new dto.StatDto(h.app, h.uri, cast((1) as int))" +
-            "from EndpointHit as h " +
-            "where h.timestamp >= :start " +
-            "and h.timestamp <= :end " +
-            "and (:uris is null or h.uri in :uris) " +
-            "group by h.app, h.uri, case when (:unique = true) then h.ip else cast('ip' as string) end ")
-    List<StatDto> findAllByStartEndTime(LocalDateTime start,
-                                        LocalDateTime end,
-                                        @Param("uris") List<String> uris,
-                                        @Param("unique") boolean unique);
+    @Query("select new dto.StatDto(e.app, e.uri, count(distinct e.ip)) " +
+            "from EndpointHit e " +
+            "where e.timestamp between ?2 and ?3 " +
+            "and e.uri in ?1 " +
+            "group by e.app, e.uri")
+    List<StatDto> findStatWithUnique(List<String> uris, LocalDateTime start, LocalDateTime end);
 
+    @Query("select new dto.StatDto(e.app, e.uri, count(e.ip)) " +
+            "from EndpointHit e " +
+            "where e.timestamp between ?2 and ?3 " +
+            "and e.uri in ?1 " +
+            "group by e.app, e.uri")
+    List<StatDto> findStatNOtUnique(List<String> uris, LocalDateTime start, LocalDateTime end);
 }

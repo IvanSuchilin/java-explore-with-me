@@ -10,7 +10,10 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.stats.repository.StatRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,16 @@ public class StatService {
 
     public List<StatDto> getStat(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
         log.info("Получен запрос на получений статистики");
-        return statRepository.findAllByStartEndTime(start, end, uris, unique);
+        if (uris == null || uris.isEmpty()) {
+            return new ArrayList<>();
+        } else {
+            if (unique) {
+                return statRepository.findStatWithUnique(uris, start, end)
+                        .stream().sorted(Comparator.comparing(StatDto::getHits).reversed()).collect(Collectors.toList());
+            } else {
+                return statRepository.findStatNOtUnique(uris, start, end)
+                        .stream().sorted(Comparator.comparing(StatDto::getHits).reversed()).collect(Collectors.toList());
+            }
+        }
     }
 }
