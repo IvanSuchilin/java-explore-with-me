@@ -26,12 +26,16 @@ public class Event {
     @Min(20)
     private String annotation;
     @ManyToOne
-    @JoinColumn(name = "category_id")
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+    @Column(name = "confirmed_requests")
     private int confirmedRequests;
+    @Column(name = "create_date", nullable = false)
     private LocalDateTime createdOn;
+    @Column(name = "description", nullable = false)
+    @Min(20)
     private String description;
-    @Column(nullable = false)
+    @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
     @ManyToOne
     @JoinColumn(name = "initiator_id")
@@ -41,18 +45,23 @@ public class Event {
             @AttributeOverride(name = "lon", column = @Column(name = "lon"))
     })
     private Location location;
-
+    @Column(name = "paid", nullable = false)
     private boolean paid;
+    @Column(name = "participant_limit")
     private int participantLimit;
+    @Column(name = "available")
     private boolean available;
+    @Column(name = "published_on", nullable = false)
     private LocalDateTime publishedOn;
+    @Column(name = "request_moderation", nullable = false)
     private boolean requestModeration;
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "state", nullable = false)
     private State state;
-    @Column(nullable = false)
+    @Column(name = "title", nullable = false)
+    @Min(3)
     private String title;
-    @Column(nullable = false)
+    @Column(name = "views", nullable = false)
     private Long views;
 
     public enum State {
