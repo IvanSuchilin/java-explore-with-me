@@ -8,7 +8,6 @@ import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.user.model.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.Min;
 import java.time.LocalDateTime;
 
 @Entity
@@ -23,7 +22,6 @@ public class Event {
     @Column(name = "event_id", updatable = false, nullable = false, unique = true)
     private Long id;
     @Column(name = "annotation", nullable = false)
-    @Min(20)
     private String annotation;
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
@@ -33,7 +31,6 @@ public class Event {
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createdOn;
     @Column(name = "description", nullable = false)
-    @Min(20)
     private String description;
     @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
@@ -59,7 +56,6 @@ public class Event {
     @Column(name = "state", nullable = false)
     private State state;
     @Column(name = "title", nullable = false)
-    @Min(3)
     private String title;
     @Column(name = "views", nullable = false)
     private Long views;
