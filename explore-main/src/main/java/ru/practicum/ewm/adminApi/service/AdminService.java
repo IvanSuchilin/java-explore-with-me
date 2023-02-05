@@ -1,4 +1,4 @@
-package ru.practicum.ewm.admin.service;
+package ru.practicum.ewm.adminApi.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +13,7 @@ import ru.practicum.ewm.category.mappers.CategoryMapper;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NameAlreadyExistException;
+import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
 import ru.practicum.ewm.user.dto.UserDto;
 import ru.practicum.ewm.user.mappers.UserMapper;
 import ru.practicum.ewm.user.model.User;
@@ -84,16 +85,17 @@ public class AdminService {
     public void deleteCategory(Long id) {
         log.debug("Получен запрос DELETE /admin/category/{catId}");
         Category stored = categoryRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Категория c id" + id + " не найдена"));
+                new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен"
+                        , LocalDateTime.now()));
         categoryRepository.deleteById(id);
     }
 
     public Object update(Long id, CategoryShortDto updatingDto) {
+        validator.validateCategoryForUpd(updatingDto);
         log.debug("Получен запрос PATCH /admin/category/{catId}");
         Category stored = categoryRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Категория c id" + id + " не найдена"));
+                new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен"
+                        , LocalDateTime.now()));
         if (updatingDto.getName() != null || !updatingDto.getName().isBlank()) {
             if (categoryRepository.findAll().stream()
                     .anyMatch(u -> u.getName().equals(updatingDto.getName()))) {

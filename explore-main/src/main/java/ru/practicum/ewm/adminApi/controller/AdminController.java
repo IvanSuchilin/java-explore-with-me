@@ -1,4 +1,4 @@
-package ru.practicum.ewm.admin.controller;
+package ru.practicum.ewm.adminApi.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.admin.service.AdminService;
+import ru.practicum.ewm.adminApi.service.AdminService;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.CategoryShortDto;
 import ru.practicum.ewm.user.dto.UserDto;

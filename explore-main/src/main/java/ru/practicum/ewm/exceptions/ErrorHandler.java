@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.RequestValidationException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NameAlreadyExistException;
 import ru.practicum.ewm.exceptions.userExceptions.EmailAlreadyExistException;
@@ -19,6 +20,20 @@ import java.util.Map;
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
+
+    @ExceptionHandler({NotFoundException.class})
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleNotFoundException(
+            final NotFoundException e
+    ) {
+        log.debug("Возникла ошибка {},", e.getMessage());
+        return Map.of(
+                "message", e.getMessage(),
+                "reason", e.getReason(),
+                "status", "NOT_FOUND",
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
 
     @ExceptionHandler({RequestValidationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
