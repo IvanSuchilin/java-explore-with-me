@@ -26,8 +26,6 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
-    @Column(name = "confirmed_requests")
-    private int confirmedRequests;
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createdOn;
     @Column(name = "description", nullable = false)
@@ -37,6 +35,7 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "initiator_id")
     private User initiator;
+    @Embedded
     @AttributeOverrides({
             @AttributeOverride(name = "lat", column = @Column(name = "lat")),
             @AttributeOverride(name = "lon", column = @Column(name = "lon"))
@@ -57,8 +56,6 @@ public class Event {
     private State state;
     @Column(name = "title", nullable = false)
     private String title;
-    @Column(name = "views", nullable = false)
-    private Long views;
 
     public enum State {
         PENDING,

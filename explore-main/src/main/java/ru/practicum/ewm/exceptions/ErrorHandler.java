@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
+import ru.practicum.ewm.exceptions.RequestValidationExceptions.IncorrectlyDateException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.RequestValidationException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NameAlreadyExistException;
@@ -20,6 +21,21 @@ import java.util.Map;
 @Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
+
+
+    @ExceptionHandler({IncorrectlyDateException.class})
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public Map<String, String> handleForbiddenException(
+            final IncorrectlyDateException e
+    ) {
+        log.debug("Возникла ошибка {},", e.getMessage());
+        return Map.of(
+                "message", e.getMessage(),
+                "reason", e.getReason(),
+                "status", "FORBIDDEN",
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
 
     @ExceptionHandler({NotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)

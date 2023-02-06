@@ -1,4 +1,4 @@
-package ru.practicum.ewm.adminApi.service;
+package ru.practicum.ewm.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +27,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AdminService {
+public class UserService {
     private final UserRepository userRepository;
-    private final CategoryRepository categoryRepository;
     private final DtoValidator validator;
 
     public UserDto createUser(UserDto user) {
@@ -48,8 +47,8 @@ public class AdminService {
     public void deleteUser(Long id) {
         log.debug("Получен запрос DELETE /admin/users/{userId}");
         User stored = userRepository.findById(id).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND,
-                        "Пользователь c id" + id + " не найден"));
+                new NotFoundException("Пользователь с id" + id + "не найден", "Запрашиваемый объект не найден или не доступен"
+                        , LocalDateTime.now()));
         userRepository.deleteById(id);
     }
 
@@ -68,44 +67,4 @@ public class AdminService {
                     .collect(Collectors.toList());
         }
     }
-
-    public CategoryDto createCategory(CategoryDto category) {
-        validator.validateCategory(category);
-        Category stored;
-        log.debug("Получен запрос на создание категории {}", category.getName());
-        try {
-            stored = categoryRepository.save(CategoryMapper.INSTANCE.toCategory(category));
-        } catch (RuntimeException e) {
-            throw new NameAlreadyExistException("Имя категории уже используется", "Не соблюдены условия уникальности имени"
-                    , LocalDateTime.now());
-        }
-        return CategoryMapper.INSTANCE.toDto(stored);
-    }
-
-    public void deleteCategory(Long id) {
-        log.debug("Получен запрос DELETE /admin/category/{catId}");
-        Category stored = categoryRepository.findById(id).orElseThrow(() ->
-                new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
-        categoryRepository.deleteById(id);
-    }
-
-    public Object update(Long id, CategoryShortDto updatingDto) {
-        validator.validateCategoryForUpd(updatingDto);
-        log.debug("Получен запрос PATCH /admin/category/{catId}");
-        Category stored = categoryRepository.findById(id).orElseThrow(() ->
-                new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
-        if (updatingDto.getName() != null || !updatingDto.getName().isBlank()) {
-            if (categoryRepository.findAll().stream()
-                    .anyMatch(u -> u.getName().equals(updatingDto.getName()))) {
-                throw new NameAlreadyExistException("Имя категории уже используется", "Не соблюдены условия уникальности имени"
-                        , LocalDateTime.now());
-            }
-        }
-        CategoryMapper.INSTANCE.updateCategory(updatingDto, stored);
-        Category actualCategory = categoryRepository.save(stored);
-        return CategoryMapper.INSTANCE.toDto(actualCategory);
-        }
-
 }
