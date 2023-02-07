@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.event.dto.EventUpdateDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.service.EventService;
 
@@ -28,19 +29,26 @@ public class PrivateController {
         return new ResponseEntity<>(eventService.createEvent(id, newEvent), HttpStatus.CREATED);
     }
 
-@GetMapping("/users/{userId}/events")
-public ResponseEntity<Object> getEventsByUserId(@PathVariable("userId") Long id,
-        @PositiveOrZero @RequestParam(defaultValue = "0") int from,
-        @Positive @RequestParam(defaultValue = "10") int size){
-    log.info("Получение событий, добавленных текущим пользователем c id {}", id);
-    return new ResponseEntity<>(eventService.getEventsByUserId(id, from, size), HttpStatus.OK);
-}
+    @GetMapping("/users/{userId}/events")
+    public ResponseEntity<Object> getEventsByUserId(@PathVariable("userId") Long id,
+                                                    @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+                                                    @Positive @RequestParam(defaultValue = "10") int size) {
+        log.info("Получение событий, добавленных текущим пользователем c id {}", id);
+        return new ResponseEntity<>(eventService.getEventsByUserId(id, from, size), HttpStatus.OK);
+    }
 
     @GetMapping("/users/{userId}/events/{eventId}")
     public ResponseEntity<Object> getEventsByUserAndEventId(@PathVariable("userId") Long id,
-                                                            @PathVariable Long eventId){
+                                                            @PathVariable Long eventId) {
         log.info("Получение события c id {}", id);
         return new ResponseEntity<>(eventService.getEventsByUserAndEventId(id, eventId), HttpStatus.OK);
     }
 
+    @PatchMapping("/users/{userId}/events/{eventId}")
+    public ResponseEntity<Object> update(@PathVariable Long userId,
+                             @PathVariable Long eventId,
+                             @RequestBody EventUpdateDto eventUpdateDto) {
+        log.info("Изменение действия над событием {}", eventId);
+        return new ResponseEntity<>(eventService.updateEventsByUser(userId, eventId, eventUpdateDto), HttpStatus.OK);
+    }
 }

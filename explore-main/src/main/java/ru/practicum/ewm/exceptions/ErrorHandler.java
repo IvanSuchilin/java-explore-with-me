@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
-import ru.practicum.ewm.exceptions.RequestValidationExceptions.IncorrectlyDateException;
+import ru.practicum.ewm.exceptions.RequestValidationExceptions.IncorrectlyDateStateRequestException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.RequestValidationException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NameAlreadyExistException;
@@ -23,10 +23,10 @@ import java.util.Map;
 public class ErrorHandler {
 
 
-    @ExceptionHandler({IncorrectlyDateException.class})
+    @ExceptionHandler({IncorrectlyDateStateRequestException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleForbiddenException(
-            final IncorrectlyDateException e
+            final IncorrectlyDateStateRequestException e
     ) {
         log.debug("Возникла ошибка {},", e.getMessage());
         return Map.of(

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.CategoryShortDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
-import ru.practicum.ewm.exceptions.RequestValidationExceptions.IncorrectlyDateException;
+import ru.practicum.ewm.exceptions.RequestValidationExceptions.IncorrectlyDateStateRequestException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.RequestValidationException;
 import ru.practicum.ewm.user.dto.UserDto;
 
@@ -47,7 +47,7 @@ public class DtoValidator {
 
     public void validateNewEventDto(NewEventDto newEventDto) {
         if (newEventDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-            throw new IncorrectlyDateException(
+            throw new IncorrectlyDateStateRequestException(
                     "Неверно указана дата события",
                     "Дата события не может быть в прошлом или ранее 2-х часов",
                     LocalDateTime.now()
