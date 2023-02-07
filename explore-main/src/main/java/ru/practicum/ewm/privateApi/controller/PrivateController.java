@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.service.EventService;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
+
 
 @Slf4j
 @RestController
@@ -23,4 +26,14 @@ public class PrivateController {
                                               @RequestBody NewEventDto newEvent) {
         log.info("Создание нового события в категории {}", newEvent.getCategory());
         return new ResponseEntity<>(eventService.createEvent(id, newEvent), HttpStatus.CREATED);
-    }}
+    }
+
+@GetMapping("/users/{userId}/events")
+public ResponseEntity<Object> getEventsByUserId(@PathVariable("userId") Long id,
+        @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+        @Positive @RequestParam(defaultValue = "10") int size){
+    log.info("Получение событий, добавленных текущим пользователем c id {}", id);
+    return new ResponseEntity<>(eventService.getEventsByUserId(id, from, size), HttpStatus.OK);
+}
+
+}

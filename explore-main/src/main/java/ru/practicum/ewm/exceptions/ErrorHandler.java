@@ -24,7 +24,7 @@ public class ErrorHandler {
 
 
     @ExceptionHandler({IncorrectlyDateException.class})
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleForbiddenException(
             final IncorrectlyDateException e
     ) {

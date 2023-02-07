@@ -2,6 +2,8 @@ package ru.practicum.ewm.event.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
@@ -10,11 +12,14 @@ import ru.practicum.ewm.event.mappers.EventMapper;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
+import ru.practicum.ewm.exceptions.RequestValidationExceptions.RequestValidationException;
+import ru.practicum.ewm.user.mappers.UserMapper;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
 import ru.practicum.ewm.validation.DtoValidator;
 
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,6 +32,7 @@ public class EventService {
 
     public Object createEvent(Long userId, NewEventDto newEvent) {
         validator.validateNewEventDto(newEvent);
+        try {
         User initiator = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
                         "Запрашиваемый объект не найден или не доступен"
@@ -37,11 +43,32 @@ public class EventService {
                         , LocalDateTime.now()));
         Event newEventEntity = creatingNewEvent(newEvent, initiator, stored);
         return EventMapper.INSTANCE.toEventDto(eventRepository.save(newEventEntity));
+        } catch (RuntimeException е) {
+            throw new RequestValidationException("Не верно составлен запрос",
+                    "Ошибка в параметрах запроса",
+                    LocalDateTime.now());
+        }
     }
 
     private Event creatingNewEvent(NewEventDto newEvent, User user, Category category) {
         return new Event(null, newEvent.getAnnotation(), category, LocalDateTime.now(), newEvent.getDescription(),
                 newEvent.getEventDate(), user, newEvent.getLocation(), newEvent.getPaid(), newEvent.getParticipantLimit(),
                 true, null, newEvent.getRequestModeration(), Event.State.PENDING, newEvent.getTitle());
+    }
+
+    public Object getEventsByUserId(Long userId, int from, int size) {
+        try {
+            Pageable pageable = PageRequest.of(from / size, size);
+            User initiator = userRepository.findById(userId).orElseThrow(() ->
+                    new NotFoundException("Пользователь с id" + userId + "не найден",
+                            "Запрашиваемый объект не найден или не доступен"
+                            , LocalDateTime.now()));
+            return eventRepository.getOwnerEvents(userId, pageable).stream()
+                    .map(EventMapper.INSTANCE::toEventShortDto).collect(Collectors.toList());
+        } catch (RuntimeException е) {
+            throw new RequestValidationException("Не верно составлен запрос",
+                    "Ошибка в параметрах запроса",
+                    LocalDateTime.now());
+        }
     }
 }
