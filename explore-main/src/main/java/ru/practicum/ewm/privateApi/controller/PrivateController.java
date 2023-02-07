@@ -36,4 +36,11 @@ public ResponseEntity<Object> getEventsByUserId(@PathVariable("userId") Long id,
     return new ResponseEntity<>(eventService.getEventsByUserId(id, from, size), HttpStatus.OK);
 }
 
+    @GetMapping("/users/{userId}/events/{eventId}")
+    public ResponseEntity<Object> getEventsByUserAndEventId(@PathVariable("userId") Long id,
+                                                            @PathVariable Long eventId){
+        log.info("Получение события c id {}", id);
+        return new ResponseEntity<>(eventService.getEventsByUserAndEventId(id, eventId), HttpStatus.OK);
+    }
+
 }

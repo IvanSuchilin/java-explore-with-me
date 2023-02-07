@@ -71,4 +71,22 @@ public class EventService {
                     LocalDateTime.now());
         }
     }
+
+    public Object getEventsByUserAndEventId(Long userId, Long eventId) {
+        try {
+            User initiator = userRepository.findById(userId).orElseThrow(() ->
+                    new NotFoundException("Пользователь с id" + userId + "не найден",
+                            "Запрашиваемый объект не найден или не доступен"
+                            , LocalDateTime.now()));
+            Event stored = eventRepository.findById(eventId).orElseThrow(() ->
+                    new NotFoundException("Событие с id" + eventId + "не найдено",
+                            "Запрашиваемый объект не найден или не доступен"
+                            , LocalDateTime.now()));
+            return EventMapper.INSTANCE.toEventDto(stored);
+    } catch (RuntimeException е) {
+        throw new RequestValidationException("Не верно составлен запрос",
+                "Ошибка в параметрах запроса",
+                LocalDateTime.now());
+    }
+    }
 }
