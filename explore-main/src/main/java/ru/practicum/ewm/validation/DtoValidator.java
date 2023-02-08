@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.CategoryShortDto;
+import ru.practicum.ewm.event.dto.EventUpdateDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.IncorrectlyDateStateRequestException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.RequestValidationException;
@@ -59,6 +60,18 @@ public class DtoValidator {
                     "Имя пользователя пустое",
                     LocalDateTime.now()
             );
+        }
+    }
+
+    public void validateUpdateEventDto(EventUpdateDto eventUpdateDto) {
+        if (null != eventUpdateDto.getEventDate()) {
+            if (eventUpdateDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new IncorrectlyDateStateRequestException(
+                        "Неверно указана дата события",
+                        "Дата события не может быть в прошлом или ранее 2-х часов",
+                        LocalDateTime.now()
+                );
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
+import ru.practicum.ewm.event.dto.EventUpdateAdminDto;
 import ru.practicum.ewm.event.dto.EventUpdateDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.mappers.EventMapper;
@@ -94,35 +95,72 @@ public class EventService {
     }
 
     public Object updateEventsByUser(Long userId, Long eventId, EventUpdateDto eventUpdateDto) {
-       // try {
+        try {
             Event stored = eventRepository.findById(eventId).orElseThrow(() ->
                     new NotFoundException("Событие с id" + eventId + "не найдено",
                             "Запрашиваемый объект не найден или не доступен"
                             , LocalDateTime.now()));
-            if (Objects.equals(Event.State.PUBLISHED, stored.getState())) {
+            if (Objects.equals(Event.State.PUBLISHED, stored.getState()) ||
+                    stored.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new IncorrectlyDateStateRequestException(
+                        "Условия выполнения не соблюдены",
+                        "Изменять можно неопубликованные события за 2 часа до начала",
+                        LocalDateTime.now());
+            }
+            Event updEventWithoutState = EventMapper.INSTANCE.updateEventWithUser(eventUpdateDto, stored);
+            if (eventUpdateDto.getCategory() != null) {
+                Category newCategory = categoryRepository.findById(eventUpdateDto.getCategory()).get();
+                updEventWithoutState.setCategory(newCategory);
+            }
+            if (Objects.equals(EventUpdateDto.State.SEND_TO_REVIEW, eventUpdateDto.getStateAction())) {
+                updEventWithoutState.setState(Event.State.PENDING);
+            }
+            if (Objects.equals(EventUpdateDto.State.CANCEL_REVIEW, eventUpdateDto.getStateAction())) {
+                updEventWithoutState.setState(Event.State.CANCELED);
+            }
+            return EventMapper.INSTANCE.toEventDto(eventRepository.save(updEventWithoutState));
+        } catch (RuntimeException е) {
+            throw new RequestValidationException("Не верно составлен запрос",
+                    "Ошибка в параметрах запроса",
+                    LocalDateTime.now());
+        }
+    }
+
+    public Object updateEventsByAdmin(Long eventId, EventUpdateAdminDto eventUpdateAdminDto) {
+        try {
+            Event stored = eventRepository.findById(eventId).orElseThrow(() ->
+                    new NotFoundException("Событие с id" + eventId + "не найдено",
+                            "Запрашиваемый объект не найден или не доступен"
+                            , LocalDateTime.now()));
+            if (!Objects.equals(Event.State.PENDING, stored.getState())) {
                 throw new IncorrectlyDateStateRequestException(
                         "Условия выполнения не соблюдены",
                         "Изменять можно неопубликованные события",
                         LocalDateTime.now());
             }
-            Event updEventWithoutState = EventMapper.INSTANCE.updateEventWithUser(eventUpdateDto, stored);
-            if (eventUpdateDto.getCategory() != null){
-                Category newCategory = categoryRepository.findById(eventUpdateDto.getCategory()).get();
+            if (stored.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
+                throw new IncorrectlyDateStateRequestException(
+                        "Неверно указана дата события",
+                        "Дата события не может быть менее чем за 1 час до начала",
+                        LocalDateTime.now());
+            }
+            Event updEventWithoutState = EventMapper.INSTANCE.updateEventWithUser(eventUpdateAdminDto, stored);
+            if (eventUpdateAdminDto.getCategory() != null) {
+                Category newCategory = categoryRepository.findById(eventUpdateAdminDto.getCategory()).get();
                 updEventWithoutState.setCategory(newCategory);
             }
-            if (Objects.equals(EventUpdateDto.State.SEND_TO_REVIEW, eventUpdateDto.getStateAction())) {
-                //Event updEventWithoutState = EventMapper.INSTANCE.updateEventWithUser(eventUpdateDto, stored);
-                updEventWithoutState.setState(Event.State.PENDING);
+            if (Objects.equals(EventUpdateAdminDto.State.PUBLISH_EVENT, eventUpdateAdminDto.getStateAction())) {
+                updEventWithoutState.setState(Event.State.PUBLISHED);
+                updEventWithoutState.setPublishedOn(LocalDateTime.now());
             }
-            if (Objects.equals(EventUpdateDto.State.CANCEL_REVIEW, eventUpdateDto.getStateAction())) {
-                //Event updEventWithoutState = EventMapper.INSTANCE.updateEventWithUser(eventUpdateDto, stored);
+            if (Objects.equals(EventUpdateAdminDto.State.REJECT_EVENT, eventUpdateAdminDto.getStateAction())) {
                 updEventWithoutState.setState(Event.State.CANCELED);
             }
-            return eventRepository.save(updEventWithoutState);
-        /*} catch (RuntimeException е) {
+            return EventMapper.INSTANCE.toEventDto(eventRepository.save(updEventWithoutState));
+        } catch (RuntimeException е) {
             throw new RequestValidationException("Не верно составлен запрос",
                     "Ошибка в параметрах запроса",
                     LocalDateTime.now());
-        }*/
+        }
     }
 }

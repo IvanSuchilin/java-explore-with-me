@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.CategoryShortDto;
 import ru.practicum.ewm.category.service.CategoryService;
+import ru.practicum.ewm.event.dto.EventUpdateAdminDto;
+import ru.practicum.ewm.event.dto.EventUpdateDto;
+import ru.practicum.ewm.event.service.EventService;
 import ru.practicum.ewm.user.dto.UserDto;
 import ru.practicum.ewm.user.service.UserService;
 
@@ -26,6 +29,7 @@ public class AdminController {
 
     private final UserService userService;
     private final CategoryService categoryService;
+    private final EventService eventService;
 
     @PostMapping("/users")
     public ResponseEntity<Object> createUserByAdmin(@RequestBody UserDto user) {
@@ -68,6 +72,13 @@ public class AdminController {
     public ResponseEntity<Object> patch(@PathVariable("catId") Long id, @RequestBody CategoryShortDto updatingDto) {
         log.info("Обновлеие данных категории id {}", id);
         return new ResponseEntity<>(categoryService.update(id, updatingDto), HttpStatus.OK);
+    }
+
+    @PatchMapping("/events/{eventId}")
+    public ResponseEntity<Object> update(@PathVariable Long eventId,
+                                         @RequestBody EventUpdateAdminDto eventUpdateDto) {
+        log.info("Изменение действия над событием {}", eventId);
+        return new ResponseEntity<>(eventService.updateEventsByAdmin(eventId, eventUpdateDto), HttpStatus.OK);
     }
 
 }
