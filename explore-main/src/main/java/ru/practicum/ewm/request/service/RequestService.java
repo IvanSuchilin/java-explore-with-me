@@ -14,6 +14,8 @@ import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -29,6 +31,11 @@ public class RequestService {
                 new NotFoundException("Событие с id" + eventId + "не найдено",
                         "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
+        List<Request> requests = requestRepository.findAllByRequester_IdAndAndEvent_Id(userId, eventId);
+        if (requests.size() != 0) {
+            throw new PartialRequestException("Попытка повторного запроса",
+                    "Нльзя повторно отправлять запрос на участие", LocalDateTime.now());
+        }
         if (stored.getInitiator().getId() == userId) {
             throw new PartialRequestException("Вы инициатор",
                     "Нельзя ходить на свои мероприятия как гость", LocalDateTime.now());
@@ -41,8 +48,10 @@ public class RequestService {
             throw new PartialRequestException("Мест нет",
                     "Нет свободных мест в событиии", LocalDateTime.now());
         }
+
+
         Request request = new Request();
-        if (!stored.isRequestModeration()){
+        if (!stored.isRequestModeration()) {
             request.setStatus(Request.RequestStatus.CONFIRMED);
             stored.setParticipantLimit(stored.getParticipantLimit() - 1);
             eventRepository.save(stored);
@@ -58,5 +67,27 @@ public class RequestService {
         request.setCreated(LocalDateTime.now());
         Request saved = requestRepository.save(request);
         return RequestMapper.INSTANCE.toRequestDto(saved);
+    }
+
+    public Object updCancelStatus(Long userId, Long requestId) {
+        User requester = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("Пользователь с id" + userId + "не найден",
+                        "Запрашиваемый объект не найден или не доступен"
+                        , LocalDateTime.now()));
+        Request requestStored = requestRepository.findById(requestId).orElseThrow(() ->
+                new NotFoundException("Запрос с id" + userId + "не найден",
+                        "Запрашиваемый объект не найден или не доступен"
+                        , LocalDateTime.now()));
+        requestStored.setStatus(Request.RequestStatus.CANCELED);
+       return RequestMapper.INSTANCE.toRequestDto(requestRepository.save(requestStored));
+    }
+
+    public Object getAllRequestsForUser(Long userId) {
+        User requester = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("Пользователь с id" + userId + "не найден",
+                        "Запрашиваемый объект не найден или не доступен"
+                        , LocalDateTime.now()));
+        List<Request> storedRequests = requestRepository.findAllByRequesterId(userId);
+        return storedRequests.stream().map(RequestMapper.INSTANCE::toRequestDto).collect(Collectors.toList());
     }
 }

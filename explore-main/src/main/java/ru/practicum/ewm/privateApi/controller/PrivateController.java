@@ -65,13 +65,13 @@ public class PrivateController {
     }
 
     @GetMapping("/users/{userId}/requests")
-    public ResponseEntity<Object> getRequestsForUser(@PathVariable String userId){
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Object> getRequestsForUser(@PathVariable Long userId){
+        return new ResponseEntity<>(requestService.getAllRequestsForUser(userId),HttpStatus.OK);
     }
 
     @PatchMapping("/users/{userId}/requests/{requestId}/cancel")
-    public ResponseEntity<Object> patchRequestsStateCancel(@PathVariable String userId, @PathVariable String requestId){
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Object> patchRequestsStateCancel(@PathVariable Long userId, @PathVariable Long requestId){
+        return new ResponseEntity<>(requestService.updCancelStatus(userId,requestId),HttpStatus.OK);
     }
 
     @PostMapping("/users/{userId}/requests")
