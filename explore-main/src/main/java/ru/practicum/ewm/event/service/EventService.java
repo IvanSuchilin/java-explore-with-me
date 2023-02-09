@@ -17,6 +17,7 @@ import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.IncorrectlyDateStateRequestException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
+import ru.practicum.ewm.exceptions.RequestValidationExceptions.PartialRequestException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.RequestValidationException;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
@@ -98,17 +99,40 @@ public class EventService {
     }
 
     public Object updateEventsByUser(Long userId, Long eventId, EventUpdateDto eventUpdateDto) {
-        try {
+        //try {
             Event stored = eventRepository.findById(eventId).orElseThrow(() ->
                     new NotFoundException("Событие с id" + eventId + "не найдено",
                             "Запрашиваемый объект не найден или не доступен"
                             , LocalDateTime.now()));
-            if (Objects.equals(Event.State.PUBLISHED, stored.getState()) ||
-                    stored.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+            if(!stored.getInitiator().getId().equals(userId)){
                 throw new IncorrectlyDateStateRequestException(
                         "Условия выполнения не соблюдены",
-                        "Изменять можно неопубликованные события за 2 часа до начала",
+                        "Изменять может только владелец",
                         LocalDateTime.now());
+            }
+            if (stored.getState().equals(Event.State.PUBLISHED)) {
+                throw new IncorrectlyDateStateRequestException(
+                        "Условия выполнения не соблюдены",
+                        "Изменять можно неопубликованные события",
+                        LocalDateTime.now());
+            }
+            if (eventUpdateDto.getEventDate() != null){
+                if (eventUpdateDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+                    throw new IncorrectlyDateStateRequestException(
+                            "Условия выполнения не соблюдены",
+                            "Изменять можно события за 2 часа до начала",
+                            LocalDateTime.now());
+                }
+            }
+            if (stored.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+                throw new IncorrectlyDateStateRequestException(
+                        "Условия выполнения не соблюдены",
+                        "Изменять можно события за 2 часа до начала",
+                        LocalDateTime.now());
+            }
+            if (stored.getParticipantLimit() == 0) {
+                throw new PartialRequestException("Мест нет",
+                        "Нет свободных мест в событиии", LocalDateTime.now());
             }
             Event updEventWithoutState = EventMapper.INSTANCE.updateEventWithUser(eventUpdateDto, stored);
             if (eventUpdateDto.getCategory() != null) {
@@ -122,11 +146,11 @@ public class EventService {
                 updEventWithoutState.setState(Event.State.CANCELED);
             }
             return EventMapper.INSTANCE.toEventDto(eventRepository.save(updEventWithoutState));
-        } catch (RuntimeException е) {
+       /* } catch (RuntimeException е) {
             throw new RequestValidationException("Не верно составлен запрос",
                     "Ошибка в параметрах запроса",
                     LocalDateTime.now());
-        }
+        }*/
     }
 
     public Object updateEventsByAdmin(Long eventId, EventUpdateAdminDto eventUpdateAdminDto) {
@@ -147,6 +171,9 @@ public class EventService {
                         "Дата события не может быть менее чем за 1 час до начала",
                         LocalDateTime.now());
             }
+           /* if (stored.getParticipantLimit() == 0) {
+                throw new PartialRequestException("Мест нет",
+                        "Нет свободных мест в событиии", LocalDateTime.now());*/
             Event updEventWithoutState = EventMapper.INSTANCE.updateEventWithUser(eventUpdateAdminDto, stored);
             if (eventUpdateAdminDto.getCategory() != null) {
                 Category newCategory = categoryRepository.findById(eventUpdateAdminDto.getCategory()).get();

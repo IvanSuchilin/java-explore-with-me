@@ -7,6 +7,8 @@ import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.PartialRequestException;
+import ru.practicum.ewm.request.dto.RequestDto;
+import ru.practicum.ewm.request.dto.RequestListDto;
 import ru.practicum.ewm.request.dto.RequestStatusUpdateDto;
 import ru.practicum.ewm.request.mappers.RequestMapper;
 import ru.practicum.ewm.request.model.Request;
@@ -80,7 +82,7 @@ public class RequestService {
                         "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
         requestStored.setStatus(Request.RequestStatus.CANCELED);
-       return RequestMapper.INSTANCE.toRequestDto(requestRepository.save(requestStored));
+        return RequestMapper.INSTANCE.toRequestDto(requestRepository.save(requestStored));
     }
 
     public Object getAllRequestsForUser(Long userId) {
@@ -107,7 +109,7 @@ public class RequestService {
     }
 
     public Object updateRequestsStatusForEvent(Long eventId, Long userId, RequestStatusUpdateDto dto) {
-        Event stored = eventRepository.findById(eventId).orElseThrow(() ->
+        Event storedEvent = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException("Событие с id" + eventId + "не найдено",
                         "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
@@ -115,7 +117,33 @@ public class RequestService {
                 new NotFoundException("Пользователь с id" + userId + "не найден",
                         "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
-        List<Long> idRequests = dto.getIds();
+        Long[] idRequests = dto.getRequestIds();
         Request.RequestStatus newStatus = dto.getStatus();
+        List<Request> requestsForUpdate = requestRepository.findStoredUpdRequests(eventId, idRequests);
+        for (Request request : requestsForUpdate) {
+            if (storedEvent.getParticipantLimit() == 0) {
+                throw new PartialRequestException("Мест нет",
+                        "Нет свободных мест в событиии", LocalDateTime.now());
+             /*  request.setStatus(Request.RequestStatus.REJECTED);
+                requestRepository.save(request);*/
+            }
+            if (!request.getStatus().equals(Request.RequestStatus.PENDING)) {
+                throw new PartialRequestException("Запрос не в ожидании",
+                        "Обновление возможно для статсуса" + Request.RequestStatus.PENDING, LocalDateTime.now());
+            }
+            if (newStatus.equals(Request.RequestStatus.CONFIRMED)) {
+                request.setStatus(Request.RequestStatus.CONFIRMED);
+                requestRepository.save(request);
+                storedEvent.setParticipantLimit(storedEvent.getParticipantLimit() - 1);
+            }
+        }
+        eventRepository.save(storedEvent);
+        List<RequestDto> confirmedRequests = requestRepository.findStoredUpdRequestsWithStatus(Request.RequestStatus.CONFIRMED,
+                idRequests).stream().map(RequestMapper.INSTANCE::toRequestDto).collect(Collectors.toList());
+
+        List<RequestDto> rejectedRequests = requestRepository.findStoredUpdRequestsWithStatus(Request.RequestStatus.REJECTED,
+                idRequests).stream().map(RequestMapper.INSTANCE::toRequestDto).collect(Collectors.toList());
+        RequestListDto returned = new RequestListDto(confirmedRequests, rejectedRequests);
+        return returned;
     }
 }

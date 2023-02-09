@@ -61,8 +61,8 @@ public class PrivateController {
     }
 
     @PatchMapping("/users/{userId}/events/{eventId}/requests")
-    public ResponseEntity<Object> patchRequestsState(@PathVariable Long eventId, @PathVariable Long userId,
-    @RequestParam RequestStatusUpdateDto dto){
+    public ResponseEntity<Object> patchRequestsState(@PathVariable Long userId,@PathVariable Long eventId,
+                                                     @RequestBody RequestStatusUpdateDto dto){
         return new ResponseEntity<>(requestService.updateRequestsStatusForEvent(eventId, userId, dto),HttpStatus.OK);
     }
 
