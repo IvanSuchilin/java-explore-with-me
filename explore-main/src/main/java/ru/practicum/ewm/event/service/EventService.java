@@ -1,5 +1,7 @@
 package ru.practicum.ewm.event.service;
 
+import client.StatClient;
+import dto.EndpointHitDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -16,11 +18,11 @@ import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.IncorrectlyDateStateRequestException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.RequestValidationException;
-import ru.practicum.ewm.user.mappers.UserMapper;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
 import ru.practicum.ewm.validation.DtoValidator;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -33,6 +35,7 @@ public class EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final DtoValidator validator;
+   // private final StatClient statClient;
 
     public Object createEvent(Long userId, NewEventDto newEvent) {
         validator.validateNewEventDto(newEvent);
@@ -162,5 +165,25 @@ public class EventService {
                     "Ошибка в параметрах запроса",
                     LocalDateTime.now());
         }
+    }
+
+    public Object getEventDyId(Long id, HttpServletRequest request) {
+        Event stored = null;
+        try {
+            stored = eventRepository.findByIdAndState(id, Event.State.PUBLISHED);
+        } catch (RuntimeException е) {
+            new NotFoundException("Событие с id" + id + "не найдено",
+                    "Запрашиваемый объект не найден или не доступен"
+                    , LocalDateTime.now());
+        }
+        EndpointHitDto endpointHitDto = new EndpointHitDto(
+                null,
+                "explore-main",
+                request.getRequestURI(),
+                request.getRemoteAddr(),
+                LocalDateTime.now()
+        );
+        //statClient.post(endpointHitDto);
+        return null;
     }
 }

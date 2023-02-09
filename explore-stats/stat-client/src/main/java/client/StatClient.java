@@ -17,11 +17,11 @@ public class StatClient {
         this.rest = rest;
     }
 
-    protected ResponseEntity<Object> post(EndpointHitDto body) {
+    public ResponseEntity<Object> post(EndpointHitDto body) {
         return makeAndSendRequest(HttpMethod.POST, "/hit", null, body);
     }
 
-    protected ResponseEntity<Object> get(String start, String end, Collection<String> uris, boolean unique) {
+    public ResponseEntity<Object> get(String start, String end, Collection<String> uris, boolean unique) {
         Map<String, Object> parameters = Map.of(
                 "start", start,
                 "end", end,
@@ -30,7 +30,7 @@ public class StatClient {
         return makeAndSendRequest(HttpMethod.GET, "/stats", parameters, null);
     }
 
-    private ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String, Object> parameters,
+    public ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String, Object> parameters,
                                                       @Nullable EndpointHitDto body) {
         HttpEntity requestEntity = new HttpEntity<>(body, defaultHeaders());
 

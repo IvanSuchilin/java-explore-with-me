@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.dto.EventUpdateDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.request.service.RequestService;
 
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
@@ -21,6 +22,7 @@ import javax.validation.constraints.PositiveOrZero;
 @RequestMapping
 public class PrivateController {
     private final EventService eventService;
+    private final RequestService requestService;
 
     @PostMapping("/users/{userId}/events")
     public ResponseEntity<Object> createEvent(@PathVariable("userId") Long id,
@@ -50,5 +52,31 @@ public class PrivateController {
                              @RequestBody EventUpdateDto eventUpdateDto) {
         log.info("Изменение действия над событием {}", eventId);
         return new ResponseEntity<>(eventService.updateEventsByUser(userId, eventId, eventUpdateDto), HttpStatus.OK);
+    }
+
+    @GetMapping("/users/{userId}/events/{eventId}/requests")
+    public ResponseEntity<Object> getRequestsForOwner(@PathVariable String eventId, @PathVariable String userId){
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PatchMapping("/users/{userId}/events/{eventId}/requests")
+    public ResponseEntity<Object> patchRequestsState(@PathVariable String eventId, @PathVariable String userId){
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/users/{userId}/requests")
+    public ResponseEntity<Object> getRequestsForUser(@PathVariable String userId){
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PatchMapping("/users/{userId}/requests/{requestId}/cancel")
+    public ResponseEntity<Object> patchRequestsStateCancel(@PathVariable String userId, @PathVariable String requestId){
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/users/{userId}/requests")
+    public ResponseEntity<Object> createRequestForEvent(@Positive@PathVariable Long userId,
+                                                        @Positive @RequestParam Long eventId) {
+        return new ResponseEntity<>(requestService.createRequest(userId, eventId),HttpStatus.CREATED);
     }
 }

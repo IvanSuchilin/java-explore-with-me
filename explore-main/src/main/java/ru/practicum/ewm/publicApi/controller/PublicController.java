@@ -7,7 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.category.service.CategoryService;
+import ru.practicum.ewm.event.service.EventService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.text.MessageFormat;
@@ -19,6 +21,7 @@ import java.text.MessageFormat;
 @RequestMapping
 public class PublicController {
     private final CategoryService categoryService;
+    private final EventService eventService;
 
     @GetMapping("/categories/{catId}")
     public ResponseEntity<Object> get(@PathVariable("catId") Long id) {
@@ -32,5 +35,28 @@ public class PublicController {
         log.info(MessageFormat.format("Получение списка категорий id: {0} с {1} категории и размером страницы {2}",
                 from, size));
         return new ResponseEntity<>(categoryService.getCategories(from, size), HttpStatus.OK);
+    }
+
+    @GetMapping("/compilations")
+    public ResponseEntity<Object> getCompilations(){
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/compilations/{compId}")
+    public ResponseEntity<Object> getCompilations(@PathVariable Long compId){
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/events/{id}")
+    public ResponseEntity<Object> getEventById(@Positive@PathVariable Long id, HttpServletRequest request){
+        log.info("client ip: {}", request.getRemoteAddr());
+        log.info("endpoint path: {}", request.getRequestURI());
+        return new ResponseEntity<>(eventService.getEventDyId(id, request), HttpStatus.OK);
+    }
+
+//фильтр
+    @GetMapping("/events")
+    public ResponseEntity<Object> getEvents(){
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

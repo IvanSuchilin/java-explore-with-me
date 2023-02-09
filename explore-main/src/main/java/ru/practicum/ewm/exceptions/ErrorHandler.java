@@ -6,10 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
-import ru.practicum.ewm.exceptions.RequestValidationExceptions.IncorrectlyDateStateRequestException;
-import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
-import ru.practicum.ewm.exceptions.RequestValidationExceptions.RequestValidationException;
-import ru.practicum.ewm.exceptions.RequestValidationExceptions.NameAlreadyExistException;
+import ru.practicum.ewm.exceptions.RequestValidationExceptions.*;
 import ru.practicum.ewm.exceptions.userExceptions.EmailAlreadyExistException;
 import ru.practicum.ewm.exceptions.userExceptions.InvalidEmailException;
 import ru.practicum.ewm.exceptions.userExceptions.UserNotFoundException;
@@ -65,6 +62,19 @@ public class ErrorHandler {
         );
     }
 
+    @ExceptionHandler({PartialRequestException.class})
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handlePartialRequestException(
+            final PartialRequestException e
+    ) {
+        log.debug("Возникла ошибка {},", e.getMessage());
+        return Map.of(
+                "message", e.getMessage(),
+                "reason", e.getReason(),
+                "status", "CONFLICT",
+                "timestamp", LocalDateTime.now().toString()
+        );
+    }
     @ExceptionHandler({NameAlreadyExistException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleNameAlreadyExistException(
