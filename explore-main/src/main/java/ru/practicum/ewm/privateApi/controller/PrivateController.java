@@ -55,8 +55,8 @@ public class PrivateController {
     }
 
     @GetMapping("/users/{userId}/events/{eventId}/requests")
-    public ResponseEntity<Object> getRequestsForOwner(@PathVariable String eventId, @PathVariable String userId){
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Object> getRequestsForOwner(@PathVariable Long eventId, @PathVariable Long userId){
+        return new ResponseEntity<>(requestService.getAllRequestsByEventId(eventId, userId),HttpStatus.OK);
     }
 
     @PatchMapping("/users/{userId}/events/{eventId}/requests")

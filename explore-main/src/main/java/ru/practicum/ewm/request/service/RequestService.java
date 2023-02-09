@@ -31,7 +31,7 @@ public class RequestService {
                 new NotFoundException("Событие с id" + eventId + "не найдено",
                         "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
-        List<Request> requests = requestRepository.findAllByRequester_IdAndAndEvent_Id(userId, eventId);
+        List<Request> requests = requestRepository.findAllByRequester_IdAndEvent_Id(userId, eventId);
         if (requests.size() != 0) {
             throw new PartialRequestException("Попытка повторного запроса",
                     "Нльзя повторно отправлять запрос на участие", LocalDateTime.now());
@@ -88,6 +88,20 @@ public class RequestService {
                         "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
         List<Request> storedRequests = requestRepository.findAllByRequesterId(userId);
+        return storedRequests.stream().map(RequestMapper.INSTANCE::toRequestDto).collect(Collectors.toList());
+    }
+
+    public Object getAllRequestsByEventId(Long eventId, Long userId) {
+        Event stored = eventRepository.findById(eventId).orElseThrow(() ->
+                new NotFoundException("Событие с id" + eventId + "не найдено",
+                        "Запрашиваемый объект не найден или не доступен"
+                        , LocalDateTime.now()));
+        User owner = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("Пользователь с id" + userId + "не найден",
+                        "Запрашиваемый объект не найден или не доступен"
+                        , LocalDateTime.now()));
+        List<Request> storedRequests =
+                requestRepository.findAllByEvent_Id(eventId);
         return storedRequests.stream().map(RequestMapper.INSTANCE::toRequestDto).collect(Collectors.toList());
     }
 }
