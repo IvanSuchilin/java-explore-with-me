@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.event.dto.EventUpdateDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.service.EventService;
+import ru.practicum.ewm.request.dto.RequestStatusUpdateDto;
 import ru.practicum.ewm.request.service.RequestService;
 
 import javax.validation.constraints.Positive;
@@ -60,8 +61,9 @@ public class PrivateController {
     }
 
     @PatchMapping("/users/{userId}/events/{eventId}/requests")
-    public ResponseEntity<Object> patchRequestsState(@PathVariable String eventId, @PathVariable String userId){
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Object> patchRequestsState(@PathVariable Long eventId, @PathVariable Long userId,
+    @RequestParam RequestStatusUpdateDto dto){
+        return new ResponseEntity<>(requestService.updateRequestsStatusForEvent(eventId, userId, dto),HttpStatus.OK);
     }
 
     @GetMapping("/users/{userId}/requests")

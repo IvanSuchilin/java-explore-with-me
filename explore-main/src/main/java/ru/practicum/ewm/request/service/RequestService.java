@@ -7,6 +7,7 @@ import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.PartialRequestException;
+import ru.practicum.ewm.request.dto.RequestStatusUpdateDto;
 import ru.practicum.ewm.request.mappers.RequestMapper;
 import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.request.repository.RequestRepository;
@@ -34,7 +35,7 @@ public class RequestService {
         List<Request> requests = requestRepository.findAllByRequester_IdAndEvent_Id(userId, eventId);
         if (requests.size() != 0) {
             throw new PartialRequestException("Попытка повторного запроса",
-                    "Нльзя повторно отправлять запрос на участие", LocalDateTime.now());
+                    "Нельзя повторно отправлять запрос на участие", LocalDateTime.now());
         }
         if (stored.getInitiator().getId() == userId) {
             throw new PartialRequestException("Вы инициатор",
@@ -103,5 +104,18 @@ public class RequestService {
         List<Request> storedRequests =
                 requestRepository.findAllByEvent_Id(eventId);
         return storedRequests.stream().map(RequestMapper.INSTANCE::toRequestDto).collect(Collectors.toList());
+    }
+
+    public Object updateRequestsStatusForEvent(Long eventId, Long userId, RequestStatusUpdateDto dto) {
+        Event stored = eventRepository.findById(eventId).orElseThrow(() ->
+                new NotFoundException("Событие с id" + eventId + "не найдено",
+                        "Запрашиваемый объект не найден или не доступен"
+                        , LocalDateTime.now()));
+        User owner = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("Пользователь с id" + userId + "не найден",
+                        "Запрашиваемый объект не найден или не доступен"
+                        , LocalDateTime.now()));
+        List<Long> idRequests = dto.getIds();
+        Request.RequestStatus newStatus = dto.getStatus();
     }
 }

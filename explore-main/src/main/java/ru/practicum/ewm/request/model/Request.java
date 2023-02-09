@@ -31,6 +31,6 @@ public class Request {
     private RequestStatus status;
 
     public enum RequestStatus {
-        CONFIRMED, CANCELED, PENDING
+        CONFIRMED, CANCELED, PENDING, REJECTED
     }
 }
