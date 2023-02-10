@@ -2,19 +2,23 @@ package client;
 
 import dto.EndpointHitDto;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Collection;
 import java.util.Map;
 
-
 public class StatClient {
-    protected final RestTemplate rest;
-
-    public StatClient(RestTemplate rest) {
-        this.rest = rest;
+    private final String uriStat;
+    private final RestTemplate rest = new RestTemplate();
+@Autowired
+    public StatClient( String uriStat) {
+        this.uriStat = uriStat;
     }
 
     public ResponseEntity<Object> post(EndpointHitDto body) {

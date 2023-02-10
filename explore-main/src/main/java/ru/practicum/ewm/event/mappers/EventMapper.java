@@ -21,7 +21,7 @@ public interface EventMapper {
 
     EventShortDto toEventShortDto (Event event);
     EventDto toEventDto (Event event);
-
+    EventFullDto toEventFullDto (Event event);
     Location toEntity(Location location);
 
     @Mapping(target = "state", ignore = true)

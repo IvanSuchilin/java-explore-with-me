@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS EVENTS
     published_on       TIMESTAMP,
     request_moderation BOOLEAN       NOT NULL,
     state              VARCHAR       NOT NULL,
-    title              VARCHAR(120)  NOT NULL
+    title              VARCHAR(120)  NOT NULL,
+    event_views        BIGINT DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS REQUESTS

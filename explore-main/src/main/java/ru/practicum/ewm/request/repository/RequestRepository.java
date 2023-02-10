@@ -17,4 +17,6 @@ public interface RequestRepository extends JpaRepository<Request, Long> {
 
     @Query(value = "SELECT r FROM Request r WHERE r.status = :status AND r.id IN :ids")
     List<Request> findStoredUpdRequestsWithStatus(@Param("status") Request.RequestStatus status, @Param("ids") Long[] ids);
+
+    List<Request> findAllByStatusAndAndEvent_Id(@Param("status") Request.RequestStatus status, Long id);
 }

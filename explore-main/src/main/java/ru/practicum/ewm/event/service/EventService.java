@@ -2,13 +2,16 @@ package ru.practicum.ewm.event.service;
 
 import client.StatClient;
 import dto.EndpointHitDto;
+import dto.StatDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
+import ru.practicum.ewm.event.dto.EventFullDto;
 import ru.practicum.ewm.event.dto.EventUpdateAdminDto;
 import ru.practicum.ewm.event.dto.EventUpdateDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
@@ -19,12 +22,15 @@ import ru.practicum.ewm.exceptions.RequestValidationExceptions.IncorrectlyDateSt
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.PartialRequestException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.RequestValidationException;
+import ru.practicum.ewm.request.model.Request;
+import ru.practicum.ewm.request.repository.RequestRepository;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
 import ru.practicum.ewm.validation.DtoValidator;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -35,8 +41,10 @@ public class EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
+    private final RequestRepository requestRepository;
     private final DtoValidator validator;
-   // private final StatClient statClient;
+    private final StatClient statClient = new StatClient("http://localhost:9090");
+
 
     public Object createEvent(Long userId, NewEventDto newEvent) {
         validator.validateNewEventDto(newEvent);
@@ -61,7 +69,7 @@ public class EventService {
     private Event creatingNewEvent(NewEventDto newEvent, User user, Category category) {
         return new Event(null, newEvent.getAnnotation(), category, LocalDateTime.now(), newEvent.getDescription(),
                 newEvent.getEventDate(), user, newEvent.getLocation(), newEvent.getPaid(), newEvent.getParticipantLimit(),
-                true, null, newEvent.getRequestModeration(), Event.State.PENDING, newEvent.getTitle());
+                true, null, newEvent.getRequestModeration(), Event.State.PENDING, newEvent.getTitle(), 0);
     }
 
     public Object getEventsByUserId(Long userId, int from, int size) {
@@ -100,52 +108,52 @@ public class EventService {
 
     public Object updateEventsByUser(Long userId, Long eventId, EventUpdateDto eventUpdateDto) {
         //try {
-            Event stored = eventRepository.findById(eventId).orElseThrow(() ->
-                    new NotFoundException("Событие с id" + eventId + "не найдено",
-                            "Запрашиваемый объект не найден или не доступен"
-                            , LocalDateTime.now()));
-            if(!stored.getInitiator().getId().equals(userId)){
-                throw new IncorrectlyDateStateRequestException(
-                        "Условия выполнения не соблюдены",
-                        "Изменять может только владелец",
-                        LocalDateTime.now());
-            }
-            if (stored.getState().equals(Event.State.PUBLISHED)) {
-                throw new IncorrectlyDateStateRequestException(
-                        "Условия выполнения не соблюдены",
-                        "Изменять можно неопубликованные события",
-                        LocalDateTime.now());
-            }
-            if (eventUpdateDto.getEventDate() != null){
-                if (eventUpdateDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
-                    throw new IncorrectlyDateStateRequestException(
-                            "Условия выполнения не соблюдены",
-                            "Изменять можно события за 2 часа до начала",
-                            LocalDateTime.now());
-                }
-            }
-            if (stored.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+        Event stored = eventRepository.findById(eventId).orElseThrow(() ->
+                new NotFoundException("Событие с id" + eventId + "не найдено",
+                        "Запрашиваемый объект не найден или не доступен"
+                        , LocalDateTime.now()));
+        if (!stored.getInitiator().getId().equals(userId)) {
+            throw new IncorrectlyDateStateRequestException(
+                    "Условия выполнения не соблюдены",
+                    "Изменять может только владелец",
+                    LocalDateTime.now());
+        }
+        if (stored.getState().equals(Event.State.PUBLISHED)) {
+            throw new IncorrectlyDateStateRequestException(
+                    "Условия выполнения не соблюдены",
+                    "Изменять можно неопубликованные события",
+                    LocalDateTime.now());
+        }
+        if (eventUpdateDto.getEventDate() != null) {
+            if (eventUpdateDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
                 throw new IncorrectlyDateStateRequestException(
                         "Условия выполнения не соблюдены",
                         "Изменять можно события за 2 часа до начала",
                         LocalDateTime.now());
             }
-            if (stored.getParticipantLimit() == 0) {
-                throw new PartialRequestException("Мест нет",
-                        "Нет свободных мест в событиии", LocalDateTime.now());
-            }
-            Event updEventWithoutState = EventMapper.INSTANCE.updateEventWithUser(eventUpdateDto, stored);
-            if (eventUpdateDto.getCategory() != null) {
-                Category newCategory = categoryRepository.findById(eventUpdateDto.getCategory()).get();
-                updEventWithoutState.setCategory(newCategory);
-            }
-            if (Objects.equals(EventUpdateDto.State.SEND_TO_REVIEW, eventUpdateDto.getStateAction())) {
-                updEventWithoutState.setState(Event.State.PENDING);
-            }
-            if (Objects.equals(EventUpdateDto.State.CANCEL_REVIEW, eventUpdateDto.getStateAction())) {
-                updEventWithoutState.setState(Event.State.CANCELED);
-            }
-            return EventMapper.INSTANCE.toEventDto(eventRepository.save(updEventWithoutState));
+        }
+        if (stored.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new IncorrectlyDateStateRequestException(
+                    "Условия выполнения не соблюдены",
+                    "Изменять можно события за 2 часа до начала",
+                    LocalDateTime.now());
+        }
+        if (stored.getParticipantLimit() == 0) {
+            throw new PartialRequestException("Мест нет",
+                    "Нет свободных мест в событиии", LocalDateTime.now());
+        }
+        Event updEventWithoutState = EventMapper.INSTANCE.updateEventWithUser(eventUpdateDto, stored);
+        if (eventUpdateDto.getCategory() != null) {
+            Category newCategory = categoryRepository.findById(eventUpdateDto.getCategory()).get();
+            updEventWithoutState.setCategory(newCategory);
+        }
+        if (Objects.equals(EventUpdateDto.State.SEND_TO_REVIEW, eventUpdateDto.getStateAction())) {
+            updEventWithoutState.setState(Event.State.PENDING);
+        }
+        if (Objects.equals(EventUpdateDto.State.CANCEL_REVIEW, eventUpdateDto.getStateAction())) {
+            updEventWithoutState.setState(Event.State.CANCELED);
+        }
+        return EventMapper.INSTANCE.toEventDto(eventRepository.save(updEventWithoutState));
        /* } catch (RuntimeException е) {
             throw new RequestValidationException("Не верно составлен запрос",
                     "Ошибка в параметрах запроса",
@@ -203,6 +211,7 @@ public class EventService {
                     "Запрашиваемый объект не найден или не доступен"
                     , LocalDateTime.now());
         }
+
         EndpointHitDto endpointHitDto = new EndpointHitDto(
                 null,
                 "explore-main",
@@ -210,7 +219,14 @@ public class EventService {
                 request.getRemoteAddr(),
                 LocalDateTime.now()
         );
-        //statClient.post(endpointHitDto);
-        return null;
+
+        statClient.post(endpointHitDto);
+        stored.setViews(stored.getViews()+1);
+        EventFullDto eventFullDto = EventMapper.INSTANCE.toEventFullDto(stored);
+        List<Request> confirmedRequests = requestRepository.findAllByStatusAndAndEvent_Id(Request.RequestStatus.CONFIRMED,
+                id);
+        eventFullDto.setConfirmedRequests(confirmedRequests.size());
+
+        return eventFullDto;
     }
 }

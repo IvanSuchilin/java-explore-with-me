@@ -98,7 +98,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/compilations/{compId}")
-    public ResponseEntity<Object> deleteCategoryByAdmin() {
+    public ResponseEntity<Object> deleteCompilationByAdmin() {
         return new ResponseEntity<>(true, HttpStatus.NO_CONTENT);
     }
 }

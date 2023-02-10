@@ -56,6 +56,8 @@ public class Event {
     private State state;
     @Column(name = "title", nullable = false)
     private String title;
+    @Column(name = "event_views", nullable = false)
+    private Integer views;
 
     public enum State {
         PENDING,
