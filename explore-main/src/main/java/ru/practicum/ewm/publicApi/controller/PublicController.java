@@ -56,7 +56,9 @@ public class PublicController {
 
 //фильтр
     @GetMapping("/events")
-    public ResponseEntity<Object> getEvents(){
+    public ResponseEntity<Object> getEvents(HttpServletRequest request){
+        log.info("client ip: {}", request.getRemoteAddr());
+        log.info("endpoint path: {}", request.getRequestURI());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

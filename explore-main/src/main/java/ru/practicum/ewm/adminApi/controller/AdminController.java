@@ -93,7 +93,7 @@ public class AdminController {
     }
 
     @PatchMapping("/compilations/{compId}")
-    public ResponseEntity<Object> updateEventByAdmin(){
+    public ResponseEntity<Object> updateCompilationByAdmin(){
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

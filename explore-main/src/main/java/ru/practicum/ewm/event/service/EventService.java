@@ -46,7 +46,7 @@ public class EventService {
     private final DtoValidator validator;
 
     DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-   private final StatClient statClient = new StatClient("http://localhost:9090","explore-main", new RestTemplateBuilder());
+    private final StatClient statClient = new StatClient("http://localhost:9090", "explore-main", new RestTemplateBuilder());
 
 
     public Object createEvent(Long userId, NewEventDto newEvent) {
@@ -214,25 +214,17 @@ public class EventService {
                     "Запрашиваемый объект не найден или не доступен"
                     , LocalDateTime.now());
         }
-        EndpointHitDto endpointHitDto = new EndpointHitDto(
-                null,
-                "explore-main",
-                request.getRequestURI(),
-                request.getRemoteAddr(),
-                LocalDateTime.now()
-        );
-        statClient.addHit(endpointHitDto);
+        statClient.addHit(request);
         EventFullDto eventFullDto = EventMapper.INSTANCE.toEventFullDto(stored);
-
         List<StatDto> stat =
                 statClient.getStat(stored.getCreatedOn().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
                         LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
-                        List.of("/events/"+ stored.getId()), false).getBody();
-        if(stat.size()>0){
+                        List.of("/events/" + stored.getId()), false).getBody();
+        if (stat.size() > 0) {
             eventFullDto.setViews(stat.get(0).getHits());
             stored.setViews(stat.get(0).getHits());
             eventRepository.save(stored);
-            }
+        }
         List<Request> confirmedRequests = requestRepository.findAllByStatusAndAndEvent_Id(Request.RequestStatus.CONFIRMED,
                 id);
         eventFullDto.setConfirmedRequests(confirmedRequests.size());

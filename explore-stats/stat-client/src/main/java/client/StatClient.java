@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,14 @@ public class StatClient {
                 .build();
     }
 
-    public void addHit(EndpointHitDto endpointHitDto) {
+    public void addHit(HttpServletRequest request) {
+        EndpointHitDto endpointHitDto = new EndpointHitDto(
+                null,
+                "explore-main",
+                request.getRequestURI(),
+                request.getRemoteAddr(),
+                LocalDateTime.now()
+        );
         template.postForEntity("/hit",
                 new HttpEntity<>(endpointHitDto),
                 EndpointHitDto.class);

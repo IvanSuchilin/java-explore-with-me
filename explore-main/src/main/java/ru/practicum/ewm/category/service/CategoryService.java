@@ -10,6 +10,7 @@ import ru.practicum.ewm.category.dto.CategoryShortDto;
 import ru.practicum.ewm.category.mappers.CategoryMapper;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
+import ru.practicum.ewm.exceptions.RequestValidationExceptions.IncorrectlyDateStateRequestException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NameAlreadyExistException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
 import ru.practicum.ewm.validation.DtoValidator;
@@ -42,7 +43,14 @@ public class CategoryService {
         Category stored = categoryRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
-        categoryRepository.deleteById(id);
+        try {
+            categoryRepository.deleteById(id);
+        } catch (RuntimeException e) {
+            throw new IncorrectlyDateStateRequestException(
+                    "Условия выполнения не соблюдены",
+                    "Удалять можно только непривязанную категорию",
+                    LocalDateTime.now());
+        }
     }
 
     public Object update(Long id, CategoryShortDto updatingDto) {
