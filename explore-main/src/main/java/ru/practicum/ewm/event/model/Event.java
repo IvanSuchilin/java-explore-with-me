@@ -1,5 +1,6 @@
 package ru.practicum.ewm.event.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,7 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Column(name = "create_date", nullable = false)
     private LocalDateTime createdOn;
     @Column(name = "description", nullable = false)

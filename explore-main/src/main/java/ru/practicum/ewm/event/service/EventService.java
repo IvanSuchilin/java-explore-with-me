@@ -1,6 +1,7 @@
 package ru.practicum.ewm.event.service;
 
 import client.StatClient;
+import com.querydsl.core.BooleanBuilder;
 import dto.EndpointHitDto;
 import dto.StatDto;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
@@ -17,11 +19,13 @@ import ru.practicum.ewm.event.dto.EventUpdateDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.mappers.EventMapper;
 import ru.practicum.ewm.event.model.Event;
+import ru.practicum.ewm.event.model.QEvent;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.IncorrectlyDateStateRequestException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.PartialRequestException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.RequestValidationException;
+import ru.practicum.ewm.publicApi.controller.PublicController;
 import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.request.repository.RequestRepository;
 import ru.practicum.ewm.user.model.User;
@@ -51,6 +55,7 @@ public class EventService {
 
     public Object createEvent(Long userId, NewEventDto newEvent) {
         validator.validateNewEventDto(newEvent);
+        log.info("Создание события в категории {}", newEvent.getCategory());
         try {
             User initiator = userRepository.findById(userId).orElseThrow(() ->
                     new NotFoundException("Пользователь с id" + userId + "не найден",
@@ -76,6 +81,7 @@ public class EventService {
     }
 
     public Object getEventsByUserId(Long userId, int from, int size) {
+        log.info("Получение информации о событии пользователем");
         try {
             Pageable pageable = PageRequest.of(from / size, size);
             User initiator = userRepository.findById(userId).orElseThrow(() ->
@@ -92,6 +98,7 @@ public class EventService {
     }
 
     public Object getEventsByUserAndEventId(Long userId, Long eventId) {
+        log.info("Получение информации о событии пользователем");
         try {
             User initiator = userRepository.findById(userId).orElseThrow(() ->
                     new NotFoundException("Пользователь с id" + userId + "не найден",
@@ -111,6 +118,7 @@ public class EventService {
 
     public Object updateEventsByUser(Long userId, Long eventId, EventUpdateDto eventUpdateDto) {
         //try {
+        log.info("Обновление события пользователем");
         Event stored = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException("Событие с id" + eventId + "не найдено",
                         "Запрашиваемый объект не найден или не доступен"
@@ -165,6 +173,7 @@ public class EventService {
     }
 
     public Object updateEventsByAdmin(Long eventId, EventUpdateAdminDto eventUpdateAdminDto) {
+        log.info("Обновление события админом");
         try {
             Event stored = eventRepository.findById(eventId).orElseThrow(() ->
                     new NotFoundException("Событие с id" + eventId + "не найдено",
@@ -206,6 +215,7 @@ public class EventService {
     }
 
     public Object getEventById(Long id, HttpServletRequest request) {
+        log.info("Получение информации пользователем public");
         Event stored = null;
         try {
             stored = eventRepository.findByIdAndState(id, Event.State.PUBLISHED);
@@ -229,5 +239,45 @@ public class EventService {
                 id);
         eventFullDto.setConfirmedRequests(confirmedRequests.size());
         return eventFullDto;
+    }
+
+    public Object getEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart,
+                            LocalDateTime rangeEnd, Boolean onlyAvailable, PublicController.FilterSort sort,
+                            Integer from, Integer size, HttpServletRequest request) {
+        log.info("Получение информации о событиях с фильтрами public");
+        statClient.addHit(request);
+        QEvent qEvent = QEvent.event;
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
+        booleanBuilder.and(qEvent.state.eq(Event.State.PUBLISHED));
+        if (text != null) {
+            booleanBuilder.and(qEvent.annotation.containsIgnoreCase(text).or(qEvent.description.containsIgnoreCase(text)));
+        }
+        if (categories != null) {
+            booleanBuilder.and(QEvent.event.category.id.in(categories));
+        }
+        if (paid != null) {
+            booleanBuilder.and(QEvent.event.paid.eq(paid));
+        }
+        if (onlyAvailable != null) {
+            booleanBuilder.and(QEvent.event.available.eq(true));
+        }
+        if (rangeStart != null) {
+            booleanBuilder.and(qEvent.eventDate.after(rangeStart));
+        }
+
+        if (rangeEnd != null) {
+            booleanBuilder.and(qEvent.eventDate.before(rangeEnd));
+        }
+        if (rangeStart == null) {
+            booleanBuilder.and(qEvent.eventDate.after(LocalDateTime.now()));
+        }
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Direction.ASC, "eventDate"));
+        if (sort.equals(PublicController.FilterSort.VIEWS)) {
+            pageable = PageRequest.of(from / size, size, Sort.by(Sort.Direction.ASC, "views"));
+        }
+        log.info("Получение информации о событиях с фильтрами public из репозиория");
+        List<Event> storedEvents = eventRepository.findAll(booleanBuilder.getValue(), pageable).getContent();
+        //return storedEvents;
+        return storedEvents.stream().map(EventMapper.INSTANCE::toEventFullDto).collect(Collectors.toList());
     }
 }

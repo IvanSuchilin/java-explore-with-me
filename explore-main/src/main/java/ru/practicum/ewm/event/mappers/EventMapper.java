@@ -23,6 +23,7 @@ public interface EventMapper {
     EventDto toEventDto (Event event);
     EventFullDto toEventFullDto (Event event);
     Location toEntity(Location location);
+    EventFilterDto toEvenFilterDto(Event event);
 
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "category", ignore = true)

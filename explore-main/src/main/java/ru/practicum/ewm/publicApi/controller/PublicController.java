@@ -2,6 +2,7 @@ package ru.practicum.ewm.publicApi.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -56,9 +59,23 @@ public class PublicController {
 
 //фильтр
     @GetMapping("/events")
-    public ResponseEntity<Object> getEvents(HttpServletRequest request){
+    public ResponseEntity<Object> getEvents(@RequestParam(required = false) String text,
+                                            @RequestParam(required = false) List<Long> categories,
+                                            @RequestParam(required = false) Boolean paid,
+                                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+                                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+                                            @RequestParam(required = false, defaultValue = "false") Boolean onlyAvailable,
+                                            @RequestParam(required = false, defaultValue = "EVENT_DATE") FilterSort sort,
+                                            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                            @Positive @RequestParam(defaultValue = "10") Integer size, HttpServletRequest request){
         log.info("client ip: {}", request.getRemoteAddr());
         log.info("endpoint path: {}", request.getRequestURI());
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(eventService.getEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
+                sort, from, size, request),
+                HttpStatus.OK);
+    }
+
+    public enum FilterSort {
+        EVENT_DATE, VIEWS
     }
 }
