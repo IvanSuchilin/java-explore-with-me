@@ -3,6 +3,8 @@ package ru.practicum.ewm.stats;
 import dto.EndpointHitDto;
 import dto.StatDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import ru.practicum.ewm.stats.mappers.StatMapper;
 import ru.practicum.ewm.stats.model.EndpointHit;
@@ -28,10 +30,10 @@ public class StatController {
     }
 
     @PostMapping("/hit")
-    public EndpointHitDto saveStat(@RequestBody @Valid EndpointHitDto endpointHit) {
+    public ResponseEntity<EndpointHitDto> saveStat(@RequestBody @Valid EndpointHitDto endpointHit) {
         log.info("Получен запрос на сохрание информации об обращении к эндпоинту в контроллере {}", endpointHit.getUri());
         EndpointHit endpointHit1 = StatMapper.INSTANCE.toEndpointHit(endpointHit);
-        return statService.saveStat(endpointHit1);
+        return ResponseEntity.status(HttpStatus.CREATED).body(statService.saveStat(endpointHit1));
     }
 
     @GetMapping("/stats")

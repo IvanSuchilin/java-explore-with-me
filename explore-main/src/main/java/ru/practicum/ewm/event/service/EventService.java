@@ -30,6 +30,7 @@ import ru.practicum.ewm.validation.DtoValidator;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -43,7 +44,9 @@ public class EventService {
     private final CategoryRepository categoryRepository;
     private final RequestRepository requestRepository;
     private final DtoValidator validator;
-    private final StatClient statClient = new StatClient("http://localhost:9090");
+
+    DateTimeFormatter format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+   private final StatClient statClient = new StatClient("http://localhost:9090","explore-main", new RestTemplateBuilder());
 
 
     public Object createEvent(Long userId, NewEventDto newEvent) {
@@ -69,7 +72,7 @@ public class EventService {
     private Event creatingNewEvent(NewEventDto newEvent, User user, Category category) {
         return new Event(null, newEvent.getAnnotation(), category, LocalDateTime.now(), newEvent.getDescription(),
                 newEvent.getEventDate(), user, newEvent.getLocation(), newEvent.getPaid(), newEvent.getParticipantLimit(),
-                true, null, newEvent.getRequestModeration(), Event.State.PENDING, newEvent.getTitle(), 0);
+                true, null, newEvent.getRequestModeration(), Event.State.PENDING, newEvent.getTitle(), 0L);
     }
 
     public Object getEventsByUserId(Long userId, int from, int size) {
@@ -202,7 +205,7 @@ public class EventService {
         }
     }
 
-    public Object getEventDyId(Long id, HttpServletRequest request) {
+    public Object getEventById(Long id, HttpServletRequest request) {
         Event stored = null;
         try {
             stored = eventRepository.findByIdAndState(id, Event.State.PUBLISHED);
@@ -211,7 +214,6 @@ public class EventService {
                     "Запрашиваемый объект не найден или не доступен"
                     , LocalDateTime.now());
         }
-
         EndpointHitDto endpointHitDto = new EndpointHitDto(
                 null,
                 "explore-main",
@@ -219,14 +221,21 @@ public class EventService {
                 request.getRemoteAddr(),
                 LocalDateTime.now()
         );
-
-        statClient.post(endpointHitDto);
-        stored.setViews(stored.getViews()+1);
+        statClient.addHit(endpointHitDto);
         EventFullDto eventFullDto = EventMapper.INSTANCE.toEventFullDto(stored);
+
+        List<StatDto> stat =
+                statClient.getStat(stored.getCreatedOn().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                        LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                        List.of("/events/"+ stored.getId()), false).getBody();
+        if(stat.size()>0){
+            eventFullDto.setViews(stat.get(0).getHits());
+            stored.setViews(stat.get(0).getHits());
+            eventRepository.save(stored);
+            }
         List<Request> confirmedRequests = requestRepository.findAllByStatusAndAndEvent_Id(Request.RequestStatus.CONFIRMED,
                 id);
         eventFullDto.setConfirmedRequests(confirmedRequests.size());
-
         return eventFullDto;
     }
 }

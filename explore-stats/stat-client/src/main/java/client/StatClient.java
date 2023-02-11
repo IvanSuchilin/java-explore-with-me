@@ -1,71 +1,54 @@
 package client;
 
 import dto.EndpointHitDto;
-import org.jetbrains.annotations.Nullable;
+import dto.StatDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
-import java.util.Collection;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
+@Component
 public class StatClient {
-    private final String uriStat;
-    private final RestTemplate rest = new RestTemplate();
-@Autowired
-    public StatClient( String uriStat) {
-        this.uriStat = uriStat;
+    private final RestTemplate template;
+    private final String appName;
+
+    public StatClient(@Value("${stat-server.url}") String url,
+                      @Value("${application.name}") String appName,
+                      RestTemplateBuilder template) {
+        this.appName = appName;
+        this.template = template
+                .uriTemplateHandler(new DefaultUriBuilderFactory(url))
+                .build();
     }
 
-    public ResponseEntity<Object> post(EndpointHitDto body) {
-        return makeAndSendRequest(HttpMethod.POST, "/hit", null, body);
+    public void addHit(EndpointHitDto endpointHitDto) {
+        template.postForEntity("/hit",
+                new HttpEntity<>(endpointHitDto),
+                EndpointHitDto.class);
     }
 
-    public ResponseEntity<Object> get(String start, String end, Collection<String> uris, boolean unique) {
-        Map<String, Object> parameters = Map.of(
-                "start", start,
-                "end", end,
-                "uris", uris,
-                "unique", unique);
-        return makeAndSendRequest(HttpMethod.GET, "/stats", parameters, null);
-    }
-
-    public ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String, Object> parameters,
-                                                      @Nullable EndpointHitDto body) {
-        HttpEntity requestEntity = new HttpEntity<>(body, defaultHeaders());
-
-        ResponseEntity<Object> mainServerResponse;
-        try {
-            if (parameters != null) {
-                mainServerResponse = rest.exchange(path, method, requestEntity, Object.class, parameters);
-            } else {
-                mainServerResponse = rest.exchange(path, method, requestEntity, Object.class);
-            }
-
-        } catch (HttpStatusCodeException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
-        }
-        return prepareGatewayResponse(mainServerResponse);
-    }
-
-    private HttpHeaders defaultHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
-    }
-
-    private static ResponseEntity<Object> prepareGatewayResponse(ResponseEntity<Object> response) {
-        if (response.getStatusCode().is2xxSuccessful()) {
-            return response;
-        }
-        ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(response.getStatusCode());
-        if (response.hasBody()) {
-            return responseBuilder.body(response.getBody());
-        }
-        return responseBuilder.build();
+    public ResponseEntity<List<StatDto>> getStat(String start,
+                                                 String end,
+                                                 List<String> uris,
+                                                 boolean unique) {
+        return template.exchange("/stats?start={start}&end={end}&uris={uris}&unique={unique}",
+                HttpMethod.GET,
+                new HttpEntity<>(null),
+                new ParameterizedTypeReference<>() {
+                },
+                start, end, uris, unique);
     }
 }

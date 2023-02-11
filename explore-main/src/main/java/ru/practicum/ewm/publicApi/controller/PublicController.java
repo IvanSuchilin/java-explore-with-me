@@ -51,7 +51,7 @@ public class PublicController {
     public ResponseEntity<Object> getEventById(@Positive@PathVariable Long id, HttpServletRequest request){
         log.info("client ip: {}", request.getRemoteAddr());
         log.info("endpoint path: {}", request.getRequestURI());
-        return new ResponseEntity<>(eventService.getEventDyId(id, request), HttpStatus.OK);
+        return new ResponseEntity<>(eventService.getEventById(id, request), HttpStatus.OK);
     }
 
 //фильтр

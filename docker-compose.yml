@@ -36,6 +36,8 @@ services:
       - stats-server
       - ewm-db
     environment:
+      - application.name=explore-main
+      - stat-server.url=http://stats-server:9090
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5444/emwDb
       - SPRING_DATASOURCE_USER=root
       - SPRING_DATASOURCE_PASSWORD=root
