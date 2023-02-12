@@ -2,6 +2,7 @@ package ru.practicum.ewm.adminApi.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -10,6 +11,7 @@ import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.CategoryShortDto;
 import ru.practicum.ewm.category.service.CategoryService;
 import ru.practicum.ewm.event.dto.EventUpdateAdminDto;
+import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.service.EventService;
 import ru.practicum.ewm.user.dto.UserDto;
 import ru.practicum.ewm.user.service.UserService;
@@ -17,6 +19,7 @@ import ru.practicum.ewm.user.service.UserService;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.text.MessageFormat;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -83,8 +86,17 @@ public class AdminController {
 
     //фильтр
     @GetMapping("/events")
-    public ResponseEntity<Object> getEvents(){
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Object> getEvents(@RequestParam(required = false) List<Long> users,
+                                            @RequestParam(required = false) List<Event.State> states,
+                                            @RequestParam(required = false) List<Long> categories,
+                                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                                LocalDateTime rangeStart,
+                                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                                LocalDateTime rangeEnd,
+                                            @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                            @Positive @RequestParam(defaultValue = "10") Integer size){
+        return new ResponseEntity<>(eventService.getEventsForAdmin(users, states, categories, rangeStart, rangeEnd, from ,size),
+                HttpStatus.OK);
     }
 
     @PostMapping("/compilations")
