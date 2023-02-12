@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.category.service.CategoryService;
+import ru.practicum.ewm.compilation.service.CompilationService;
 import ru.practicum.ewm.event.service.EventService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ import java.util.List;
 public class PublicController {
     private final CategoryService categoryService;
     private final EventService eventService;
+    private final CompilationService compilationService;
 
     @GetMapping("/categories/{catId}")
     public ResponseEntity<Object> get(@PathVariable("catId") Long id) {
@@ -66,13 +68,17 @@ public class PublicController {
     }
 
     @GetMapping("/compilations")
-    public ResponseEntity<Object> getCompilations(){
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Object> getCompilations(@RequestParam(required = false) Boolean pinned,
+                                                  @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
+                                                  @Positive @RequestParam(defaultValue = "10") Integer size){
+        log.info("Получение всех подборок привязка {}", pinned);
+        return new ResponseEntity<>(compilationService.getAllCompilations(pinned, from, size),HttpStatus.OK);
     }
 
     @GetMapping("/compilations/{compId}")
-    public ResponseEntity<Object> getCompilations(@PathVariable Long compId){
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Object> getCompilationById(@PositiveOrZero@PathVariable Long compId){
+        log.info("Получение информации о подборке id {}", compId);
+        return new ResponseEntity<>(compilationService.getCompilationById(compId), HttpStatus.OK);
     }
 
     public enum FilterSort {

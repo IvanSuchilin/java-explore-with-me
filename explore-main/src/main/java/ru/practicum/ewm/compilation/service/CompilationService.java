@@ -1,15 +1,20 @@
 package ru.practicum.ewm.compilation.service;
 
 import client.StatClient;
+import com.querydsl.core.BooleanBuilder;
 import dto.StatDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.compilation.dto.CompilationDto;
 import ru.practicum.ewm.compilation.dto.NewCompilationDto;
 import ru.practicum.ewm.compilation.dto.UpdatingCompilationDto;
 import ru.practicum.ewm.compilation.model.Compilation;
+import ru.practicum.ewm.compilation.model.QCompilation;
 import ru.practicum.ewm.compilation.repository.CompilationRepository;
 import ru.practicum.ewm.event.dto.EventDtoForCompilation;
 import ru.practicum.ewm.event.dto.EventFullDto;
@@ -26,6 +31,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -70,6 +76,30 @@ public class CompilationService {
         return createCompilationDto(newCompilation);
     }
 
+
+    public CompilationDto getCompilationById(Long compId) {
+        log.info("Получение подборки по id {}", compId);
+        Compilation compilation = compilationRepository.findById(compId).orElseThrow(() ->
+                new NotFoundException("Подборка с id" + compId + "не найдена",
+                        "Запрашиваемый объект не найден или не доступен"
+                        , LocalDateTime.now()));
+        return createCompilationDto(compilation);
+    }
+
+    public List<CompilationDto> getAllCompilations(Boolean pinned, Integer from, Integer size) {
+        log.info("Получение всех подборок с пагинацией и привзкой {}", pinned);
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Direction.ASC, "id"));
+        QCompilation qCompilation = QCompilation.compilation;
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
+        booleanBuilder.and(qCompilation.pinned.eq(true));
+        if (pinned != null) {
+            booleanBuilder.and(qCompilation.pinned.eq(pinned));
+        }
+        return compilationRepository.findAll(Objects.requireNonNull(booleanBuilder.getValue()),
+                        pageable).getContent()
+                .stream().map(this::createCompilationDto).collect(Collectors.toList());
+    }
+
     private Compilation createCompilationForUpdate(Compilation stored, UpdatingCompilationDto updatingCompilationDto) {
         if (updatingCompilationDto.getPinned() != null) {
             stored.setPinned(updatingCompilationDto.getPinned());
@@ -109,5 +139,4 @@ public class CompilationService {
         eventFullDto.setConfirmedRequests(confirmedRequests.size());
         return eventFullDto;
     }
-
 }

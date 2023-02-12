@@ -13,6 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RequestStatusUpdateDto {
-    private Long[] requestIds;
+    private List<Long> requestIds;
     private Request.RequestStatus status;
 }

@@ -108,24 +108,25 @@ public class RequestService {
         return storedRequests.stream().map(RequestMapper.INSTANCE::toRequestDto).collect(Collectors.toList());
     }
 
-    public Object updateRequestsStatusForEvent(Long eventId, Long userId, RequestStatusUpdateDto dto) {
+    public RequestListDto updateRequestsStatusForEvent(Long eventId, Long userId, RequestStatusUpdateDto dto) {
         Event storedEvent = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException("Событие с id" + eventId + "не найдено",
                         "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
-        User owner = userRepository.findById(userId).orElseThrow(() ->
+        userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
                         "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
-        Long[] idRequests = dto.getRequestIds();
+        List<Long> idRequests = dto.getRequestIds();
         Request.RequestStatus newStatus = dto.getStatus();
+
         List<Request> requestsForUpdate = requestRepository.findStoredUpdRequests(eventId, idRequests);
         for (Request request : requestsForUpdate) {
             if (storedEvent.getParticipantLimit() == 0) {
+                request.setStatus(Request.RequestStatus.REJECTED);
+                requestRepository.save(request);
                 throw new PartialRequestException("Мест нет",
                         "Нет свободных мест в событиии", LocalDateTime.now());
-             /*  request.setStatus(Request.RequestStatus.REJECTED);
-                requestRepository.save(request);*/
             }
             if (!request.getStatus().equals(Request.RequestStatus.PENDING)) {
                 throw new PartialRequestException("Запрос не в ожидании",
