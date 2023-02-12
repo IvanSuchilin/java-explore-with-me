@@ -11,6 +11,7 @@ import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.CategoryShortDto;
 import ru.practicum.ewm.category.service.CategoryService;
 import ru.practicum.ewm.compilation.dto.NewCompilationDto;
+import ru.practicum.ewm.compilation.dto.UpdatingCompilationDto;
 import ru.practicum.ewm.compilation.service.CompilationService;
 import ru.practicum.ewm.event.dto.EventUpdateAdminDto;
 import ru.practicum.ewm.event.model.Event;
@@ -106,16 +107,20 @@ public class AdminController {
     @PostMapping("/compilations")
     public ResponseEntity<Object> createCompilations(@RequestBody NewCompilationDto newCompilationDto) {
         log.info("Создание подборки {}", newCompilationDto.getTitle());
-        return new ResponseEntity<>(compilationService.createCompilation(newCompilationDto),HttpStatus.CREATED);
+        return new ResponseEntity<>(compilationService.createCompilation(newCompilationDto), HttpStatus.CREATED);
     }
 
     @PatchMapping("/compilations/{compId}")
-    public ResponseEntity<Object> updateCompilationByAdmin(@PathVariable String compId) {
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<Object> updateCompilationByAdmin(@Positive @PathVariable Long compId,
+                                                           @RequestBody UpdatingCompilationDto updatingCompilationDto) {
+        log.info("Обновление подборки {}", compId);
+        return new ResponseEntity<>(compilationService.updateCompilation(compId, updatingCompilationDto),HttpStatus.OK);
     }
 
     @DeleteMapping("/compilations/{compId}")
-    public ResponseEntity<Object> deleteCompilationByAdmin(@PathVariable String compId) {
+    public ResponseEntity<Object> deleteCompilationByAdmin(@Positive @PathVariable Long compId) {
+        log.info("Удаление подборки {}", compId);
+        compilationService.deleteCompilationById(compId);
         return new ResponseEntity<>(true, HttpStatus.NO_CONTENT);
     }
 }
