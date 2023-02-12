@@ -49,36 +49,36 @@ public class PrivateController {
 
     @PatchMapping("/users/{userId}/events/{eventId}")
     public ResponseEntity<Object> update(@PathVariable Long userId,
-                             @PathVariable Long eventId,
-                             @RequestBody EventUpdateDto eventUpdateDto) {
+                                         @PathVariable Long eventId,
+                                         @RequestBody EventUpdateDto eventUpdateDto) {
         log.info("Изменение действия над событием {}", eventId);
         return new ResponseEntity<>(eventService.updateEventsByUser(userId, eventId, eventUpdateDto), HttpStatus.OK);
     }
 
     @GetMapping("/users/{userId}/events/{eventId}/requests")
-    public ResponseEntity<Object> getRequestsForOwner(@PathVariable Long eventId, @PathVariable Long userId){
-        return new ResponseEntity<>(requestService.getAllRequestsByEventId(eventId, userId),HttpStatus.OK);
+    public ResponseEntity<Object> getRequestsForOwner(@PathVariable Long eventId, @PathVariable Long userId) {
+        return new ResponseEntity<>(requestService.getAllRequestsByEventId(eventId, userId), HttpStatus.OK);
     }
 
     @PatchMapping("/users/{userId}/events/{eventId}/requests")
-    public ResponseEntity<Object> patchRequestsState(@PathVariable Long userId,@PathVariable Long eventId,
-                                                     @RequestBody RequestStatusUpdateDto dto){
-        return new ResponseEntity<>(requestService.updateRequestsStatusForEvent(eventId, userId, dto),HttpStatus.OK);
+    public ResponseEntity<Object> patchRequestsState(@PathVariable Long userId, @PathVariable Long eventId,
+                                                     @RequestBody RequestStatusUpdateDto dto) {
+        return new ResponseEntity<>(requestService.updateRequestsStatusForEvent(eventId, userId, dto), HttpStatus.OK);
     }
 
     @GetMapping("/users/{userId}/requests")
-    public ResponseEntity<Object> getRequestsForUser(@PathVariable Long userId){
-        return new ResponseEntity<>(requestService.getAllRequestsForUser(userId),HttpStatus.OK);
+    public ResponseEntity<Object> getRequestsForUser(@PathVariable Long userId) {
+        return new ResponseEntity<>(requestService.getAllRequestsForUser(userId), HttpStatus.OK);
     }
 
     @PatchMapping("/users/{userId}/requests/{requestId}/cancel")
-    public ResponseEntity<Object> patchRequestsStateCancel(@PathVariable Long userId, @PathVariable Long requestId){
-        return new ResponseEntity<>(requestService.updCancelStatus(userId,requestId),HttpStatus.OK);
+    public ResponseEntity<Object> patchRequestsStateCancel(@PathVariable Long userId, @PathVariable Long requestId) {
+        return new ResponseEntity<>(requestService.updCancelStatus(userId, requestId), HttpStatus.OK);
     }
 
     @PostMapping("/users/{userId}/requests")
-    public ResponseEntity<Object> createRequestForEvent(@Positive@PathVariable Long userId,
+    public ResponseEntity<Object> createRequestForEvent(@Positive @PathVariable Long userId,
                                                         @Positive @RequestParam Long eventId) {
-        return new ResponseEntity<>(requestService.createRequest(userId, eventId),HttpStatus.CREATED);
+        return new ResponseEntity<>(requestService.createRequest(userId, eventId), HttpStatus.CREATED);
     }
 }

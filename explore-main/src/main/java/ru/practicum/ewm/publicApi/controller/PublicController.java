@@ -40,16 +40,6 @@ public class PublicController {
         return new ResponseEntity<>(categoryService.getCategories(from, size), HttpStatus.OK);
     }
 
-    @GetMapping("/compilations")
-    public ResponseEntity<Object> getCompilations(){
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @GetMapping("/compilations/{compId}")
-    public ResponseEntity<Object> getCompilations(@PathVariable Long compId){
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
     @GetMapping("/events/{id}")
     public ResponseEntity<Object> getEventById(@Positive@PathVariable Long id, HttpServletRequest request){
         log.info("client ip: {}", request.getRemoteAddr());
@@ -73,6 +63,16 @@ public class PublicController {
         return new ResponseEntity<>(eventService.getEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
                 sort, from, size, request),
                 HttpStatus.OK);
+    }
+
+    @GetMapping("/compilations")
+    public ResponseEntity<Object> getCompilations(){
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @GetMapping("/compilations/{compId}")
+    public ResponseEntity<Object> getCompilations(@PathVariable Long compId){
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     public enum FilterSort {

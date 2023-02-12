@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.CategoryShortDto;
 import ru.practicum.ewm.category.service.CategoryService;
+import ru.practicum.ewm.compilation.dto.NewCompilationDto;
+import ru.practicum.ewm.compilation.service.CompilationService;
 import ru.practicum.ewm.event.dto.EventUpdateAdminDto;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.service.EventService;
@@ -32,6 +34,7 @@ public class AdminController {
     private final UserService userService;
     private final CategoryService categoryService;
     private final EventService eventService;
+    private final CompilationService compilationService;
 
     @PostMapping("/users")
     public ResponseEntity<Object> createUserByAdmin(@RequestBody UserDto user) {
@@ -90,27 +93,29 @@ public class AdminController {
                                             @RequestParam(required = false) List<Event.State> states,
                                             @RequestParam(required = false) List<Long> categories,
                                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-                                                LocalDateTime rangeStart,
+                                            LocalDateTime rangeStart,
                                             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-                                                LocalDateTime rangeEnd,
+                                            LocalDateTime rangeEnd,
                                             @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
-                                            @Positive @RequestParam(defaultValue = "10") Integer size){
-        return new ResponseEntity<>(eventService.getEventsForAdmin(users, states, categories, rangeStart, rangeEnd, from ,size),
+                                            @Positive @RequestParam(defaultValue = "10") Integer size) {
+        log.info("Получение всех событий admin");
+        return new ResponseEntity<>(eventService.getEventsForAdmin(users, states, categories, rangeStart, rangeEnd, from, size),
                 HttpStatus.OK);
     }
 
     @PostMapping("/compilations")
-    public ResponseEntity<Object> createCompilations() {
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<Object> createCompilations(@RequestBody NewCompilationDto newCompilationDto) {
+        log.info("Создание подборки {}", newCompilationDto.getTitle());
+        return new ResponseEntity<>(compilationService.createCompilation(newCompilationDto),HttpStatus.CREATED);
     }
 
     @PatchMapping("/compilations/{compId}")
-    public ResponseEntity<Object> updateCompilationByAdmin(){
+    public ResponseEntity<Object> updateCompilationByAdmin(@PathVariable String compId) {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @DeleteMapping("/compilations/{compId}")
-    public ResponseEntity<Object> deleteCompilationByAdmin() {
+    public ResponseEntity<Object> deleteCompilationByAdmin(@PathVariable String compId) {
         return new ResponseEntity<>(true, HttpStatus.NO_CONTENT);
     }
 }

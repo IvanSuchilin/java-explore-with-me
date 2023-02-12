@@ -21,4 +21,7 @@ public interface EventRepository extends JpaRepository <Event, Long>, QuerydslPr
     Event findByIdAndState(Long id, Event.State published);
 
     Page<Event> findAll(Predicate value, Pageable pageable);
+
+    @Query("SELECT e FROM Event e WHERE e.id IN :events")
+    List<Event> findAllByEvents(List<Long> events);
 }

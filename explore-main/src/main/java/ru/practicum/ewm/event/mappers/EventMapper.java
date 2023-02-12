@@ -19,11 +19,12 @@ public interface EventMapper {
     @Mapping(target = "category.id", source = "category")
     Event toEvent (NewEventDto newEventDto);
 
+    //EventDtoForCompilation toCompilationDto (EventFullDto eventFullDto);
+    EventDtoForCompilation toCompilationDtoFromFull (EventFullDto eventFullDto);
     EventShortDto toEventShortDto (Event event);
     EventDto toEventDto (Event event);
     EventFullDto toEventFullDto (Event event);
     Location toEntity(Location location);
-    EventFilterDto toEvenFilterDto(Event event);
 
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "category", ignore = true)
