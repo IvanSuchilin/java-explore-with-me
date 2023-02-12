@@ -73,6 +73,7 @@ public class CompilationService {
                         "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
         Compilation newCompilation = createCompilationForUpdate(compilation, updatingCompilationDto);
+        compilationRepository.save(newCompilation);
         return createCompilationDto(newCompilation);
     }
 
@@ -109,8 +110,6 @@ public class CompilationService {
         }
         if (updatingCompilationDto.getEvents() != null) {
             stored.setEvents(eventRepository.findAllByEvents(updatingCompilationDto.getEvents()));
-        } else {
-            stored.setEvents(new ArrayList<>());
         }
         return stored;
     }

@@ -137,6 +137,10 @@ public class RequestService {
                 requestRepository.save(request);
                 storedEvent.setParticipantLimit(storedEvent.getParticipantLimit() - 1);
             }
+            if (newStatus.equals(Request.RequestStatus.REJECTED)) {
+                request.setStatus(Request.RequestStatus.REJECTED);
+                requestRepository.save(request);
+            }
         }
         eventRepository.save(storedEvent);
         List<RequestDto> confirmedRequests = requestRepository.findStoredUpdRequestsWithStatus(Request.RequestStatus.CONFIRMED,
