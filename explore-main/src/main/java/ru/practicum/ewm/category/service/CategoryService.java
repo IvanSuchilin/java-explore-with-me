@@ -32,8 +32,8 @@ public class CategoryService {
         try {
             stored = categoryRepository.save(CategoryMapper.INSTANCE.toCategory(category));
         } catch (RuntimeException e) {
-            throw new NameAlreadyExistException("Имя категории уже используется", "Не соблюдены условия уникальности имени"
-                    , LocalDateTime.now());
+            throw new NameAlreadyExistException("Имя категории уже используется", "Не соблюдены условия уникальности имени",
+                    LocalDateTime.now());
         }
         return CategoryMapper.INSTANCE.toDto(stored);
     }
@@ -41,8 +41,8 @@ public class CategoryService {
     public void deleteCategory(Long id) {
         log.debug("Получен запрос DELETE /admin/category/{catId}");
         categoryRepository.findById(id).orElseThrow(() ->
-                new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен",
+                        LocalDateTime.now()));
         try {
             categoryRepository.deleteById(id);
         } catch (RuntimeException e) {
@@ -57,13 +57,13 @@ public class CategoryService {
         validator.validateCategoryForUpd(updatingDto);
         log.debug("Получен запрос PATCH /admin/category/{catId}");
         Category stored = categoryRepository.findById(id).orElseThrow(() ->
-                new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен",
+                        LocalDateTime.now()));
         if (updatingDto.getName() != null || !updatingDto.getName().isBlank()) {
             if (categoryRepository.findAll().stream()
                     .anyMatch(u -> u.getName().equals(updatingDto.getName()))) {
-                throw new NameAlreadyExistException("Имя категории уже используется", "Не соблюдены условия уникальности имени"
-                        , LocalDateTime.now());
+                throw new NameAlreadyExistException("Имя категории уже используется", "Не соблюдены условия уникальности имени",
+                        LocalDateTime.now());
             }
         }
         CategoryMapper.INSTANCE.updateCategory(updatingDto, stored);
@@ -74,8 +74,8 @@ public class CategoryService {
     public Object getCategoryById(Long id) {
         log.debug("Получен запрос GET /categories/{catId}");
         Category stored = categoryRepository.findById(id).orElseThrow(() ->
-                new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен",
+                        LocalDateTime.now()));
         return CategoryMapper.INSTANCE.toDto(stored);
     }
 

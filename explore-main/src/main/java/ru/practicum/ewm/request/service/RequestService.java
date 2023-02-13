@@ -28,12 +28,10 @@ public class RequestService {
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
 
-
     public Object createRequest(long userId, long eventId) {
         Event stored = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException("Событие с id" + eventId + "не найдено",
-                        "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         List<Request> requests = requestRepository.findAllByRequester_IdAndEvent_Id(userId, eventId);
         if (requests.size() != 0) {
             throw new PartialRequestException("Попытка повторного запроса",
@@ -63,8 +61,7 @@ public class RequestService {
         }
         User requester = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         request.setRequester(requester);
         request.setEvent(stored);
         request.setCreated(LocalDateTime.now());
@@ -75,12 +72,10 @@ public class RequestService {
     public Object updCancelStatus(Long userId, Long requestId) {
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         Request requestStored = requestRepository.findById(requestId).orElseThrow(() ->
                 new NotFoundException("Запрос с id" + userId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         requestStored.setStatus(Request.RequestStatus.CANCELED);
         return RequestMapper.INSTANCE.toRequestDto(requestRepository.save(requestStored));
     }
@@ -88,8 +83,7 @@ public class RequestService {
     public Object getAllRequestsForUser(Long userId) {
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         List<Request> storedRequests = requestRepository.findAllByRequesterId(userId);
         return storedRequests.stream().map(RequestMapper.INSTANCE::toRequestDto).collect(Collectors.toList());
     }
@@ -97,8 +91,7 @@ public class RequestService {
     public Object getAllRequestsByEventId(Long eventId, Long userId) {
         eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException("Событие с id" + eventId + "не найдено",
-                        "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
                         "Запрашиваемый объект не найден или не доступен"
@@ -111,8 +104,7 @@ public class RequestService {
     public RequestListDto updateRequestsStatusForEvent(Long eventId, Long userId, RequestStatusUpdateDto dto) {
         Event storedEvent = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException("Событие с id" + eventId + "не найдено",
-                        "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
                         "Запрашиваемый объект не найден или не доступен"

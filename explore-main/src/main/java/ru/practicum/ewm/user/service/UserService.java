@@ -31,8 +31,8 @@ public class UserService {
         try {
             saveUser = userRepository.save(UserMapper.INSTANCE.toUser(user));
         } catch (RuntimeException e) {
-            throw new NameAlreadyExistException("Имя (почта) уже используется", "Не соблюдены условия уникальности имени (почты)"
-                    , LocalDateTime.now());
+            throw new NameAlreadyExistException("Имя (почта) уже используется", "Не соблюдены условия уникальности имени (почты)",
+                    LocalDateTime.now());
         }
         return UserMapper.INSTANCE.toDto(saveUser);
     }
@@ -40,8 +40,8 @@ public class UserService {
     public void deleteUser(Long id) {
         log.debug("Получен запрос DELETE /admin/users/{userId}");
         userRepository.findById(id).orElseThrow(() ->
-                new NotFoundException("Пользователь с id" + id + "не найден", "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                new NotFoundException("Пользователь с id" + id + "не найден", "Запрашиваемый объект не найден или не доступен",
+                        LocalDateTime.now()));
         userRepository.deleteById(id);
     }
 

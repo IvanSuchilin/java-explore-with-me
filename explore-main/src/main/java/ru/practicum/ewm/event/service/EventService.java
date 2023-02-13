@@ -57,18 +57,15 @@ public class EventService {
         try {
             User initiator = userRepository.findById(userId).orElseThrow(() ->
                     new NotFoundException("Пользователь с id" + userId + "не найден",
-                            "Запрашиваемый объект не найден или не доступен"
-                            , LocalDateTime.now()));
+                            "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
             Category stored = categoryRepository.findById(newEvent.getCategory()).orElseThrow(() ->
                     new NotFoundException("Категория с id" + newEvent.getCategory() + "не найдена",
-                            "Запрашиваемый объект не найден или не доступен"
-                            , LocalDateTime.now()));
+                            "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
             Event newEventEntity = creatingNewEvent(newEvent, initiator, stored);
             return EventMapper.INSTANCE.toEventDto(eventRepository.save(newEventEntity));
         } catch (RuntimeException е) {
             throw new RequestValidationException("Не верно составлен запрос",
-                    "Ошибка в параметрах запроса",
-                    LocalDateTime.now());
+                    "Ошибка в параметрах запроса", LocalDateTime.now());
         }
     }
 
@@ -78,14 +75,12 @@ public class EventService {
             Pageable pageable = PageRequest.of(from / size, size);
             userRepository.findById(userId).orElseThrow(() ->
                     new NotFoundException("Пользователь с id" + userId + "не найден",
-                            "Запрашиваемый объект не найден или не доступен"
-                            , LocalDateTime.now()));
+                            "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
             return eventRepository.getOwnerEvents(userId, pageable).stream()
                     .map(EventMapper.INSTANCE::toEventShortDto).collect(Collectors.toList());
         } catch (RuntimeException е) {
             throw new RequestValidationException("Не верно составлен запрос",
-                    "Ошибка в параметрах запроса",
-                    LocalDateTime.now());
+                    "Ошибка в параметрах запроса", LocalDateTime.now());
         }
     }
 
@@ -94,12 +89,10 @@ public class EventService {
         try {
             userRepository.findById(userId).orElseThrow(() ->
                     new NotFoundException("Пользователь с id" + userId + "не найден",
-                            "Запрашиваемый объект не найден или не доступен"
-                            , LocalDateTime.now()));
+                            "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
             Event stored = eventRepository.findById(eventId).orElseThrow(() ->
                     new NotFoundException("Событие с id" + eventId + "не найдено",
-                            "Запрашиваемый объект не найден или не доступен"
-                            , LocalDateTime.now()));
+                            "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
             return EventMapper.INSTANCE.toEventDto(stored);
         } catch (RuntimeException е) {
             throw new RequestValidationException("Не верно составлен запрос",
@@ -112,8 +105,7 @@ public class EventService {
         log.info("Обновление события пользователем");
         Event stored = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException("Событие с id" + eventId + "не найдено",
-                        "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         validator.updValidationDtoForUser(userId, eventUpdateDto, stored);
         Event updEventWithoutState = EventMapper.INSTANCE.updateEventWithUser(eventUpdateDto, stored);
         if (eventUpdateDto.getCategory() != null) {
@@ -133,8 +125,7 @@ public class EventService {
         log.info("Обновление события админом");
         Event stored = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException("Событие с id" + eventId + "не найдено",
-                        "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         validator.updValidationDtoForAdmin(stored, eventUpdateAdminDto);
         Event updEventWithoutState = EventMapper.INSTANCE.updateEventWithUser(eventUpdateAdminDto, stored);
         if (eventUpdateAdminDto.getCategory() != null) {
@@ -158,8 +149,7 @@ public class EventService {
             stored = eventRepository.findByIdAndState(id, Event.State.PUBLISHED);
         } catch (RuntimeException е) {
             new NotFoundException("Событие с id" + id + "не найдено",
-                    "Запрашиваемый объект не найден или не доступен"
-                    , LocalDateTime.now());
+                    "Запрашиваемый объект не найден или не доступен", LocalDateTime.now());
         }
         statClient.addHit(request);
         EventFullDto eventFullDto = EventMapper.INSTANCE.toEventFullDto(stored);

@@ -47,8 +47,7 @@ public class CompilationService {
         log.info("Удаление подборки admin");
         compilationRepository.findById(compId).orElseThrow(() ->
                 new NotFoundException("Подборка с id" + compId + "не найдена",
-                        "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         compilationRepository.deleteById(compId);
     }
 
@@ -67,8 +66,7 @@ public class CompilationService {
         log.info("Обновление подборки подборки admin");
         Compilation compilation = compilationRepository.findById(compId).orElseThrow(() ->
                 new NotFoundException("Подборка с id" + compId + "не найдена",
-                        "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         Compilation newCompilation = createCompilationForUpdate(compilation, updatingCompilationDto);
         compilationRepository.save(newCompilation);
         return createCompilationDto(newCompilation);
@@ -79,8 +77,7 @@ public class CompilationService {
         log.info("Получение подборки по id {}", compId);
         Compilation compilation = compilationRepository.findById(compId).orElseThrow(() ->
                 new NotFoundException("Подборка с id" + compId + "не найдена",
-                        "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         return createCompilationDto(compilation);
     }
 
