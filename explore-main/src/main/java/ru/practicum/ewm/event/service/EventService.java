@@ -63,7 +63,7 @@ public class EventService {
                             "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
             Event newEventEntity = creatingNewEvent(newEvent, initiator, stored);
             return EventMapper.INSTANCE.toEventDto(eventRepository.save(newEventEntity));
-        } catch (RuntimeException е) {
+        } catch (RuntimeException еx) {
             throw new RequestValidationException("Не верно составлен запрос",
                     "Ошибка в параметрах запроса", LocalDateTime.now());
         }
@@ -78,7 +78,7 @@ public class EventService {
                             "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
             return eventRepository.getOwnerEvents(userId, pageable).stream()
                     .map(EventMapper.INSTANCE::toEventShortDto).collect(Collectors.toList());
-        } catch (RuntimeException е) {
+        } catch (RuntimeException runtimeException) {
             throw new RequestValidationException("Не верно составлен запрос",
                     "Ошибка в параметрах запроса", LocalDateTime.now());
         }
@@ -94,7 +94,7 @@ public class EventService {
                     new NotFoundException("Событие с id" + eventId + "не найдено",
                             "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
             return EventMapper.INSTANCE.toEventDto(stored);
-        } catch (RuntimeException е) {
+        } catch (RuntimeException runtimeException) {
             throw new RequestValidationException("Не верно составлен запрос",
                     "Ошибка в параметрах запроса",
                     LocalDateTime.now());
@@ -147,7 +147,7 @@ public class EventService {
         Event stored = null;
         try {
             stored = eventRepository.findByIdAndState(id, Event.State.PUBLISHED);
-        } catch (RuntimeException е) {
+        } catch (RuntimeException runtimeException) {
             new NotFoundException("Событие с id" + id + "не найдено",
                     "Запрашиваемый объект не найден или не доступен", LocalDateTime.now());
         }

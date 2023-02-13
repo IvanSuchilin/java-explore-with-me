@@ -94,8 +94,7 @@ public class RequestService {
                         "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         List<Request> storedRequests =
                 requestRepository.findAllByEvent_Id(eventId);
         return storedRequests.stream().map(RequestMapper.INSTANCE::toRequestDto).collect(Collectors.toList());
@@ -107,8 +106,7 @@ public class RequestService {
                         "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен"
-                        , LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         List<Long> idRequests = dto.getRequestIds();
         Request.RequestStatus newStatus = dto.getStatus();
 
