@@ -2,13 +2,13 @@ package ru.practicum.ewm.stats;
 
 import dto.EndpointHitDto;
 import dto.StatDto;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import ru.practicum.ewm.stats.mappers.StatMapper;
 import ru.practicum.ewm.stats.model.EndpointHit;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.stats.service.StatService;
@@ -20,14 +20,10 @@ import java.util.List;
 @RestController
 @Slf4j
 @Validated
+@RequiredArgsConstructor
 @RequestMapping
 public class StatController {
     private final StatService statService;
-
-    @Autowired
-    public StatController(StatService statService) {
-        this.statService = statService;
-    }
 
     @PostMapping("/hit")
     public ResponseEntity<EndpointHitDto> saveStat(@RequestBody @Valid EndpointHitDto endpointHit) {
