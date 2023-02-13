@@ -40,7 +40,7 @@ public class CategoryService {
 
     public void deleteCategory(Long id) {
         log.debug("Получен запрос DELETE /admin/category/{catId}");
-        Category stored = categoryRepository.findById(id).orElseThrow(() ->
+        categoryRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
         try {
@@ -69,7 +69,7 @@ public class CategoryService {
         CategoryMapper.INSTANCE.updateCategory(updatingDto, stored);
         Category actualCategory = categoryRepository.save(stored);
         return CategoryMapper.INSTANCE.toDto(actualCategory);
-        }
+    }
 
     public Object getCategoryById(Long id) {
         log.debug("Получен запрос GET /categories/{catId}");

@@ -4,8 +4,9 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
+
 @Getter
-public class NameAlreadyExistException extends  RuntimeException{
+public class NameAlreadyExistException extends RuntimeException {
     private final String message;
     private final String reason;
     private final HttpStatus status;

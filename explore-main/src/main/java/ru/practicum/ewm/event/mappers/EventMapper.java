@@ -16,19 +16,24 @@ import ru.practicum.ewm.user.mappers.UserMapper;
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface EventMapper {
     EventMapper INSTANCE = Mappers.getMapper(EventMapper.class);
-    @Mapping(target = "category.id", source = "category")
-    Event toEvent (NewEventDto newEventDto);
 
-    //EventDtoForCompilation toCompilationDto (EventFullDto eventFullDto);
-    EventDtoForCompilation toCompilationDtoFromFull (EventFullDto eventFullDto);
-    EventShortDto toEventShortDto (Event event);
-    EventDto toEventDto (Event event);
-    EventFullDto toEventFullDto (Event event);
+    @Mapping(target = "category.id", source = "category")
+    Event toEvent(NewEventDto newEventDto);
+
+    EventDtoForCompilation toCompilationDtoFromFull(EventFullDto eventFullDto);
+
+    EventShortDto toEventShortDto(Event event);
+
+    EventDto toEventDto(Event event);
+
+    EventFullDto toEventFullDto(Event event);
+
     Location toEntity(Location location);
 
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "category", ignore = true)
     Event updateEventWithUser(EventUpdateDto eventUpdateDto, @MappingTarget Event event);
+
     @Mapping(target = "state", ignore = true)
     @Mapping(target = "category", ignore = true)
     Event updateEventWithUser(EventUpdateAdminDto eventUpdateAdminDto, @MappingTarget Event stored);

@@ -20,7 +20,7 @@ import ru.practicum.ewm.user.mappers.UserMapper;
 public interface RequestMapper {
     RequestMapper INSTANCE = Mappers.getMapper(RequestMapper.class);
 
-   @Mapping(target = "event.id", source = "event")
+    @Mapping(target = "event.id", source = "event")
     @Mapping(target = "requester.id", source = "requester")
     Request toRequest(RequestDto requestDto);
 

@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
+
 @Getter
 public class NotFoundException extends RuntimeException {
     private final String message;

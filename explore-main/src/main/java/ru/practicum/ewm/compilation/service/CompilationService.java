@@ -25,11 +25,9 @@ import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.RequestValidationException;
 import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.request.repository.RequestRepository;
-import ru.practicum.ewm.validation.DtoValidator;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -38,7 +36,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CompilationService {
-    private final DtoValidator validator;
     private final EventRepository eventRepository;
     private final RequestRepository requestRepository;
     private final CompilationRepository compilationRepository;
@@ -130,6 +127,7 @@ public class CompilationService {
                 statClient.getStat(eventFullDto.getCreatedOn().format(returnedTimeFormat),
                         LocalDateTime.now().format(returnedTimeFormat),
                         List.of("/events/" + eventFullDto.getId()), false).getBody();
+        assert stat != null;
         if (stat.size() > 0) {
             eventFullDto.setViews(stat.get(0).getHits());
         }

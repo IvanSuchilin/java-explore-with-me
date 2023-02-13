@@ -12,6 +12,7 @@ import ru.practicum.ewm.user.model.User;
 
 
 import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor

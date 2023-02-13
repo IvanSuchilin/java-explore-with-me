@@ -4,8 +4,9 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
+
 @Getter
-public class IncorrectlyDateStateRequestException extends  RuntimeException{
+public class IncorrectlyDateStateRequestException extends RuntimeException {
     private final String message;
     private final String reason;
     private final HttpStatus status;

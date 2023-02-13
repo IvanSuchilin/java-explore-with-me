@@ -1,10 +1,12 @@
 package ru.practicum.ewm.exceptions.RequestValidationExceptions;
+
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
+
 @Getter
-public class RequestValidationException extends  RuntimeException{
+public class RequestValidationException extends RuntimeException {
     private final String message;
     private final String reason;
     private final HttpStatus status;

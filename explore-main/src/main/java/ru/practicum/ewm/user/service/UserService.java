@@ -4,14 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-import ru.practicum.ewm.category.dto.CategoryDto;
-import ru.practicum.ewm.category.dto.CategoryShortDto;
-import ru.practicum.ewm.category.mappers.CategoryMapper;
-import ru.practicum.ewm.category.model.Category;
-import ru.practicum.ewm.category.repository.CategoryRepository;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NameAlreadyExistException;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
 import ru.practicum.ewm.user.dto.UserDto;
@@ -46,7 +39,7 @@ public class UserService {
 
     public void deleteUser(Long id) {
         log.debug("Получен запрос DELETE /admin/users/{userId}");
-        User stored = userRepository.findById(id).orElseThrow(() ->
+        userRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + id + "не найден", "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
         userRepository.deleteById(id);

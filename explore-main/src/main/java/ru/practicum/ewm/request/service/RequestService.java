@@ -73,7 +73,7 @@ public class RequestService {
     }
 
     public Object updCancelStatus(Long userId, Long requestId) {
-        User requester = userRepository.findById(userId).orElseThrow(() ->
+        userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
                         "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
@@ -86,7 +86,7 @@ public class RequestService {
     }
 
     public Object getAllRequestsForUser(Long userId) {
-        User requester = userRepository.findById(userId).orElseThrow(() ->
+        userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
                         "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
@@ -95,11 +95,11 @@ public class RequestService {
     }
 
     public Object getAllRequestsByEventId(Long eventId, Long userId) {
-        Event stored = eventRepository.findById(eventId).orElseThrow(() ->
+        eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException("Событие с id" + eventId + "не найдено",
                         "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
-        User owner = userRepository.findById(userId).orElseThrow(() ->
+        userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
                         "Запрашиваемый объект не найден или не доступен"
                         , LocalDateTime.now()));
@@ -148,7 +148,6 @@ public class RequestService {
 
         List<RequestDto> rejectedRequests = requestRepository.findStoredUpdRequestsWithStatus(Request.RequestStatus.REJECTED,
                 idRequests).stream().map(RequestMapper.INSTANCE::toRequestDto).collect(Collectors.toList());
-        RequestListDto returned = new RequestListDto(confirmedRequests, rejectedRequests);
-        return returned;
+        return new RequestListDto(confirmedRequests, rejectedRequests);
     }
 }

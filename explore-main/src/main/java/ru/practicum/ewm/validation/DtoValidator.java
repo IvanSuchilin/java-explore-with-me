@@ -20,7 +20,7 @@ import java.util.Objects;
 @Component
 public class DtoValidator {
 
-    public void updValidationDtoForAdmin(Event stored, EventUpdateAdminDto eventUpdateAdminDto){
+    public void updValidationDtoForAdmin(Event stored, EventUpdateAdminDto eventUpdateAdminDto) {
         if (!Objects.equals(Event.State.PENDING, stored.getState())) {
             throw new IncorrectlyDateStateRequestException(
                     "Условия выполнения не соблюдены",

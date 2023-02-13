@@ -18,5 +18,6 @@ import ru.practicum.ewm.user.mappers.UserMapper;
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface CompilationMapper {
     CompilationMapper INSTANCE = Mappers.getMapper(CompilationMapper.class);
+
     CompilationDto toCompilationDto(Compilation compilation);
 }

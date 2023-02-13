@@ -163,6 +163,7 @@ public class EventService {
         }
         statClient.addHit(request);
         EventFullDto eventFullDto = EventMapper.INSTANCE.toEventFullDto(stored);
+        assert stored != null;
         stored.setViews(stored.getViews() + 1);
         eventRepository.save(stored);
         return preparingFullDtoWithStat(eventFullDto);
@@ -263,6 +264,7 @@ public class EventService {
                 statClient.getStat(eventFullDto.getCreatedOn().format(returnedTimeFormat),
                         LocalDateTime.now().format(returnedTimeFormat),
                         List.of("/events/" + eventFullDto.getId()), false).getBody();
+        assert stat != null;
         if (stat.size() > 0) {
             eventFullDto.setViews(stat.get(0).getHits());
         }

@@ -9,7 +9,9 @@ import java.util.List;
 
 public interface RequestRepository extends JpaRepository<Request, Long> {
     List<Request> findAllByRequester_IdAndEvent_Id(Long userId, Long eventId);
+
     List<Request> findAllByEvent_Id(Long eventId);
+
     List<Request> findAllByRequesterId(Long userId);
 
     @Query(value = "SELECT r FROM Request r WHERE r.event.id = :eventId AND r.id IN :requestIds")

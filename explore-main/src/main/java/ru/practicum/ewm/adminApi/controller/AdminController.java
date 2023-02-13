@@ -87,8 +87,6 @@ public class AdminController {
         return new ResponseEntity<>(eventService.updateEventsByAdmin(eventId, eventUpdateDto), HttpStatus.OK);
     }
 
-
-    //фильтр
     @GetMapping("/events")
     public ResponseEntity<Object> getEvents(@RequestParam(required = false) List<Long> users,
                                             @RequestParam(required = false) List<Event.State> states,
@@ -114,7 +112,7 @@ public class AdminController {
     public ResponseEntity<Object> updateCompilationByAdmin(@Positive @PathVariable Long compId,
                                                            @RequestBody UpdatingCompilationDto updatingCompilationDto) {
         log.info("Обновление подборки {}", compId);
-        return new ResponseEntity<>(compilationService.updateCompilation(compId, updatingCompilationDto),HttpStatus.OK);
+        return new ResponseEntity<>(compilationService.updateCompilation(compId, updatingCompilationDto), HttpStatus.OK);
     }
 
     @DeleteMapping("/compilations/{compId}")

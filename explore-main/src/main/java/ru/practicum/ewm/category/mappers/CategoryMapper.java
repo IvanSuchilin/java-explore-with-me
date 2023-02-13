@@ -15,7 +15,9 @@ public interface CategoryMapper {
     CategoryMapper INSTANCE = Mappers.getMapper(CategoryMapper.class);
 
     CategoryDto toDto(Category category);
+
     Category toCategory(CategoryDto categoryDto);
+
     @Mapping(target = "id", ignore = true)
     void updateCategory(CategoryShortDto updatingDto, @MappingTarget Category stored);
 }

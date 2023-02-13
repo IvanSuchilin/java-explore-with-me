@@ -75,6 +75,7 @@ public class ErrorHandler {
                 "timestamp", LocalDateTime.now().toString()
         );
     }
+
     @ExceptionHandler({NameAlreadyExistException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleNameAlreadyExistException(
@@ -88,6 +89,7 @@ public class ErrorHandler {
                 "timestamp", LocalDateTime.now().toString()
         );
     }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleSystemExceptions(final IllegalArgumentException e) {
@@ -102,9 +104,7 @@ public class ErrorHandler {
         return new ErrorResponse(e.getMessage());
     }
 
-    @ExceptionHandler({InvalidEmailException.class,
-            //ValidationFailedException.class
-    })
+    @ExceptionHandler({InvalidEmailException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidateEmailException(final RuntimeException e) {
         log.debug("Возникла ошибка {},", e.getMessage());
