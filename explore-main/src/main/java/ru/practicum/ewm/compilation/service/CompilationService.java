@@ -4,6 +4,7 @@ import client.StatClient;
 import com.querydsl.core.BooleanBuilder;
 import dto.StatDto;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.PageRequest;
@@ -34,7 +35,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-
 public class CompilationService {
     private final EventRepository eventRepository;
     private final RequestRepository requestRepository;
@@ -42,6 +42,7 @@ public class CompilationService {
     DateTimeFormatter returnedTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final StatClient statClient;
 
+    @Autowired
     public CompilationService(EventRepository eventRepository,
                               RequestRepository requestRepository,
                               CompilationRepository compilationRepository,
