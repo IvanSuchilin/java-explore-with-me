@@ -3,8 +3,8 @@ package ru.practicum.ewm.compilation.service;
 import client.StatClient;
 import com.querydsl.core.BooleanBuilder;
 import dto.StatDto;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,13 +34,24 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+
 public class CompilationService {
     private final EventRepository eventRepository;
     private final RequestRepository requestRepository;
     private final CompilationRepository compilationRepository;
     DateTimeFormatter returnedTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private final StatClient statClient = new StatClient("http://localhost:9090", "explore-main", new RestTemplateBuilder());
+    private final StatClient statClient;
+
+    public CompilationService(EventRepository eventRepository,
+                              RequestRepository requestRepository,
+                              CompilationRepository compilationRepository,
+                              @Value("${stat-server.url}") String url,
+                              @Value("${application.name}") String appName) {
+        this.eventRepository = eventRepository;
+        this.requestRepository = requestRepository;
+        this.compilationRepository = compilationRepository;
+        this.statClient = new StatClient(url, appName, new RestTemplateBuilder());
+    }
 
 
     public void deleteCompilationById(Long compId) {

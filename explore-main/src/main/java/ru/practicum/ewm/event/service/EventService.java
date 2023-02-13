@@ -4,8 +4,9 @@ import client.StatClient;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Predicate;
 import dto.StatDto;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -39,7 +40,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
@@ -48,8 +48,24 @@ public class EventService {
     private final DtoValidator validator;
 
     DateTimeFormatter returnedTimeFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private final StatClient statClient = new StatClient("http://localhost:9090", "explore-main", new RestTemplateBuilder());
 
+    private final StatClient statClient;
+
+    @Autowired
+    public EventService(EventRepository eventRepository,
+                        UserRepository userRepository,
+                        CategoryRepository categoryRepository,
+                        RequestRepository requestRepository,
+                        DtoValidator validator,
+                        @Value("${stat-server.url}") String url,
+                        @Value("${application.name}") String appName) {
+        this.eventRepository = eventRepository;
+        this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
+        this.requestRepository = requestRepository;
+        this.validator = validator;
+        statClient = new StatClient(url, appName, new RestTemplateBuilder());
+    }
 
     public Object createEvent(Long userId, NewEventDto newEvent) {
         validator.validateNewEventDto(newEvent);
@@ -148,7 +164,7 @@ public class EventService {
         try {
             stored = eventRepository.findByIdAndState(id, Event.State.PUBLISHED);
         } catch (RuntimeException runtimeException) {
-            throw  new NotFoundException("Событие с id" + id + "не найдено",
+            throw new NotFoundException("Событие с id" + id + "не найдено",
                     "Запрашиваемый объект не найден или не доступен", LocalDateTime.now());
         }
         statClient.addHit(request);
