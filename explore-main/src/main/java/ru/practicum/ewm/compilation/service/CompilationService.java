@@ -127,7 +127,6 @@ public class CompilationService {
                 statClient.getStat(eventFullDto.getCreatedOn().format(returnedTimeFormat),
                         LocalDateTime.now().format(returnedTimeFormat),
                         List.of("/events/" + eventFullDto.getId()), false).getBody();
-        assert stat != null;
         if (stat.size() > 0) {
             eventFullDto.setViews(stat.get(0).getHits());
         }
