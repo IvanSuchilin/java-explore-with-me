@@ -148,7 +148,7 @@ public class EventService {
         try {
             stored = eventRepository.findByIdAndState(id, Event.State.PUBLISHED);
         } catch (RuntimeException runtimeException) {
-            new NotFoundException("Событие с id" + id + "не найдено",
+            throw  new NotFoundException("Событие с id" + id + "не найдено",
                     "Запрашиваемый объект не найден или не доступен", LocalDateTime.now());
         }
         statClient.addHit(request);
