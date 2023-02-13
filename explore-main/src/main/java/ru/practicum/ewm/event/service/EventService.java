@@ -63,7 +63,7 @@ public class EventService {
                             "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
             Event newEventEntity = creatingNewEvent(newEvent, initiator, stored);
             return EventMapper.INSTANCE.toEventDto(eventRepository.save(newEventEntity));
-        } catch (RuntimeException еx) {
+        } catch (RuntimeException runtimeException) {
             throw new RequestValidationException("Не верно составлен запрос",
                     "Ошибка в параметрах запроса", LocalDateTime.now());
         }
