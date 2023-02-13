@@ -5,9 +5,7 @@ import dto.StatDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
@@ -49,9 +47,15 @@ public class StatClient {
                                                  boolean unique) {
         return template.exchange("/stats?start={start}&end={end}&uris={uris}&unique={unique}",
                 HttpMethod.GET,
-                new HttpEntity<>(null),
+                getHttpEntity(null),
                 new ParameterizedTypeReference<>() {
                 },
                 start, end, uris, unique);
+    }
+
+    private <T> HttpEntity<T> getHttpEntity(T dto) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        return dto == null ? new HttpEntity<>(headers) : new HttpEntity<>(dto, headers);
     }
 }
