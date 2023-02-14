@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.comment.dto.NewCommentDto;
+import ru.practicum.ewm.comment.dto.UpdateCommentDto;
 import ru.practicum.ewm.comment.service.CommentService;
 import ru.practicum.ewm.event.dto.EventUpdateDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
@@ -98,5 +99,19 @@ public class PrivateController {
         log.info("Удаление комментария автором {}", commentId);
         commentService.deleteCommentByIdByOwner(userId, commentId);
         return new ResponseEntity<>(true, HttpStatus.NO_CONTENT);
+    }
+
+
+    @PatchMapping("/users/{userId}/comments/{commentId}")
+    public ResponseEntity<Object> patchRequestsState(@PathVariable Long userId, @PathVariable Long commentId,
+                                                     @RequestBody UpdateCommentDto dto) {
+        log.info("Обновление комментария id {} автором", commentId);
+        return new ResponseEntity<>(commentService.updateCommentForEvent(commentId, userId, dto), HttpStatus.OK);
+    }
+
+    @GetMapping("/users/{userId}/comments")
+    public ResponseEntity<Object> getCommentsByUserId(@PositiveOrZero @PathVariable Long userId) {
+        log.info("Получение комментарией для пользователя id {}", userId);
+        return new ResponseEntity<>(commentService.getAllForUser(userId), HttpStatus.OK);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.category.service.CategoryService;
+import ru.practicum.ewm.comment.service.CommentService;
 import ru.practicum.ewm.compilation.service.CompilationService;
 import ru.practicum.ewm.event.service.EventService;
 
@@ -27,6 +28,7 @@ public class PublicController {
     private final CategoryService categoryService;
     private final EventService eventService;
     private final CompilationService compilationService;
+    private final CommentService commentService;
 
     @GetMapping("/categories/{catId}")
     public ResponseEntity<Object> get(@PathVariable("catId") Long id) {
@@ -77,6 +79,12 @@ public class PublicController {
     public ResponseEntity<Object> getCompilationById(@PositiveOrZero @PathVariable Long compId) {
         log.info("Получение информации о подборке id {}", compId);
         return new ResponseEntity<>(compilationService.getCompilationById(compId), HttpStatus.OK);
+    }
+
+    @GetMapping("/comments/events/{eventId}")
+    public ResponseEntity<Object> getCommentsById(@PositiveOrZero @PathVariable Long eventId) {
+        log.info("Получение комментарией для события id {}", eventId);
+        return new ResponseEntity<>(commentService.getCommentsByEventId(eventId), HttpStatus.OK);
     }
 
     public enum FilterSort {
