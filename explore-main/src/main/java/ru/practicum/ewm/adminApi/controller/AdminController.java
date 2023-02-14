@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.CategoryShortDto;
 import ru.practicum.ewm.category.service.CategoryService;
+import ru.practicum.ewm.comment.service.CommentService;
 import ru.practicum.ewm.compilation.dto.NewCompilationDto;
 import ru.practicum.ewm.compilation.dto.UpdatingCompilationDto;
 import ru.practicum.ewm.compilation.service.CompilationService;
@@ -36,6 +37,8 @@ public class AdminController {
     private final CategoryService categoryService;
     private final EventService eventService;
     private final CompilationService compilationService;
+
+    private final CommentService commentService;
 
     @PostMapping("/users")
     public ResponseEntity<Object> createUserByAdmin(@RequestBody UserDto user) {
@@ -119,6 +122,13 @@ public class AdminController {
     public ResponseEntity<Object> deleteCompilationByAdmin(@Positive @PathVariable Long compId) {
         log.info("Удаление подборки {}", compId);
         compilationService.deleteCompilationById(compId);
+        return new ResponseEntity<>(true, HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Object> deleteCommentByIdByAdmin(@Positive @PathVariable Long commentId) {
+        log.info("Удаление комментария администратором{}", commentId);
+        commentService.deleteCommentByIdByAdmin(commentId);
         return new ResponseEntity<>(true, HttpStatus.NO_CONTENT);
     }
 }

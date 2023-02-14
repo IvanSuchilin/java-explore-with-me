@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.ewm.comment.dto.NewCommentDto;
+import ru.practicum.ewm.comment.service.CommentService;
 import ru.practicum.ewm.event.dto.EventUpdateDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
 import ru.practicum.ewm.event.service.EventService;
@@ -24,6 +26,7 @@ import javax.validation.constraints.PositiveOrZero;
 public class PrivateController {
     private final EventService eventService;
     private final RequestService requestService;
+    private final CommentService commentService;
 
     @PostMapping("/users/{userId}/events")
     public ResponseEntity<Object> createEvent(@PathVariable("userId") Long id,
@@ -80,5 +83,20 @@ public class PrivateController {
     public ResponseEntity<Object> createRequestForEvent(@Positive @PathVariable Long userId,
                                                         @Positive @RequestParam Long eventId) {
         return new ResponseEntity<>(requestService.createRequest(userId, eventId), HttpStatus.CREATED);
+    }
+
+    @PostMapping("/users/{userId}/comments")
+    public ResponseEntity<Object> createComment(@Positive @PathVariable Long userId,
+                                                @RequestBody NewCommentDto newCommentDto) {
+        log.info("Создание комментария к событию");
+        return new ResponseEntity<>(commentService.createComment(userId, newCommentDto), HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/users/{userId}/comments/{commentId}")
+    public ResponseEntity<Object> deleteCommentByIdByOwner(@Positive @PathVariable Long commentId,
+                                                           @PathVariable Long userId) {
+        log.info("Удаление комментария автором {}", commentId);
+        commentService.deleteCommentByIdByOwner(userId, commentId);
+        return new ResponseEntity<>(true, HttpStatus.NO_CONTENT);
     }
 }
