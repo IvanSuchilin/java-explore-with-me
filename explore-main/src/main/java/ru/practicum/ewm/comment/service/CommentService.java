@@ -1,13 +1,19 @@
 package ru.practicum.ewm.comment.service;
 
+import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.Predicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.comment.dto.CommentDto;
 import ru.practicum.ewm.comment.dto.NewCommentDto;
 import ru.practicum.ewm.comment.dto.UpdateCommentDto;
 import ru.practicum.ewm.comment.mappers.CommentMapper;
 import ru.practicum.ewm.comment.model.Comment;
+import ru.practicum.ewm.comment.model.QComment;
 import ru.practicum.ewm.comment.repository.CommentRepository;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.repository.EventRepository;
@@ -93,5 +99,46 @@ public class CommentService {
         log.info("Получен запрос на получение комментариев для пользователя {}", userId);
         return commentRepository.getAllByUserId(userId).stream().map(CommentMapper.INSTANCE::toCommentDto)
                 .collect(Collectors.toList());
+    }
+
+    public CommentDto getCommentByIdForUser(Long userId, Long commentId) {
+        log.info("Получен запрос на получение информации о комментарии {} для пользователя {}", commentId, userId);
+        User commentator = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("Пользователь с id" + userId + "не найден",
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
+        Comment stored = commentRepository.findById(commentId).orElseThrow(() ->
+                new NotFoundException("Комментарий с id" + commentId + "не найден",
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
+        if (!Objects.equals(commentator.getId(), stored.getId())) {
+            throw new NotFoundException("Получить информацию о комментарии может только автор",
+                    "Пользователь не автор", LocalDateTime.now());
+        }
+        return CommentMapper.INSTANCE.toCommentDto(stored);
+    }
+
+    public List<CommentDto> getAll(LocalDateTime rangeStart,
+                                   LocalDateTime rangeEnd, int from, int size) {
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by(Sort.Direction.ASC, "createdOn"));
+        Predicate predicate = createPredicate(rangeStart, rangeEnd);
+        return commentRepository.findAll(Objects.requireNonNull(predicate), pageable).getContent()
+                .stream()
+                .map(CommentMapper.INSTANCE::toCommentDto)
+                .collect(Collectors.toList());
+    }
+
+    private BooleanBuilder createPredicate(LocalDateTime rangeStart,
+                                           LocalDateTime rangeEnd) {
+        QComment qComment = QComment.comment;
+        BooleanBuilder booleanBuilder = new BooleanBuilder();
+        if (rangeStart != null) {
+            booleanBuilder.and(qComment.createdOn.after(rangeStart));
+        }
+        if (rangeEnd != null) {
+            booleanBuilder.and(qComment.createdOn.before(rangeEnd));
+        }
+        if (rangeStart == null) {
+            booleanBuilder.and(qComment.createdOn.after(LocalDateTime.now()));
+        }
+        return booleanBuilder;
     }
 }

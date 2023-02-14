@@ -85,7 +85,7 @@ public class PublicController {
 
     @GetMapping("/comments/events/{eventId}")
     public ResponseEntity<Object> getCommentsById(@PositiveOrZero @PathVariable Long eventId) {
-        log.info("Получение комментарией для события id {}", eventId);
+        log.info("Получение комментариев для события id {}", eventId);
         return new ResponseEntity<>(commentService.getCommentsByEventId(eventId), HttpStatus.OK);
     }
 
