@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.CategoryShortDto;
+import ru.practicum.ewm.comment.dto.NewCommentDto;
+import ru.practicum.ewm.comment.dto.UpdateCommentDto;
 import ru.practicum.ewm.event.dto.EventUpdateAdminDto;
 import ru.practicum.ewm.event.dto.EventUpdateDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
@@ -19,6 +21,26 @@ import java.util.Objects;
 @Slf4j
 @Component
 public class DtoValidator {
+
+    public void validateNewCommentDto(NewCommentDto newCommentDto) {
+        if (newCommentDto.getText() == null || newCommentDto.getText().isEmpty()) {
+            throw new RequestValidationException(
+                    "Не указан текст комментария",
+                    "Комментарий пуст",
+                    LocalDateTime.now()
+            );
+        }
+    }
+
+    public void validateUpdCommentDto(UpdateCommentDto updateCommentDto) {
+        if (updateCommentDto.getText() == null || updateCommentDto.getText().isEmpty()) {
+            throw new RequestValidationException(
+                    "Не указан текст комментария",
+                    "Комментарий пуст",
+                    LocalDateTime.now()
+            );
+        }
+    }
 
     public void updValidationDtoForAdmin(Event stored, EventUpdateAdminDto eventUpdateAdminDto) {
         if (!Objects.equals(Event.State.PENDING, stored.getState())) {
