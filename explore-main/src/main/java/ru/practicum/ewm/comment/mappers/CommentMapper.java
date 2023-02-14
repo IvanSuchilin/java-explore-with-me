@@ -18,6 +18,7 @@ import ru.practicum.ewm.user.mappers.UserMapper;
                 EventMapper.class}, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface CommentMapper {
     CommentMapper INSTANCE = Mappers.getMapper(CommentMapper.class);
+
     @Mapping(target = "eventId", source = "event.id")
     @Mapping(target = "userId", source = "user.id")
     CommentDto toCommentDto(Comment comment);

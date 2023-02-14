@@ -131,4 +131,15 @@ public class AdminController {
         commentService.deleteCommentByIdByAdmin(commentId);
         return new ResponseEntity<>(true, HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("/comments")
+    public ResponseEntity<Object> getAll(
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
+            @PositiveOrZero @RequestParam(defaultValue = "0") int from,
+            @Positive @RequestParam(defaultValue = "10") int size) {
+        log.info("Получение всех комментариев администратором");
+        return new ResponseEntity<>(commentService.getAll(rangeStart, rangeEnd, from, size),
+        HttpStatus.OK);
+    }
 }

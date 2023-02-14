@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NewCommentDto {
-        private Long eventId;
-        private String text;
+    private Long eventId;
+    private String text;
 }

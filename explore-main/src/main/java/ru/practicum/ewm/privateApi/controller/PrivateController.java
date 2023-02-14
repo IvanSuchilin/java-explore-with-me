@@ -101,7 +101,6 @@ public class PrivateController {
         return new ResponseEntity<>(true, HttpStatus.NO_CONTENT);
     }
 
-
     @PatchMapping("/users/{userId}/comments/{commentId}")
     public ResponseEntity<Object> patchRequestsState(@PathVariable Long userId, @PathVariable Long commentId,
                                                      @RequestBody UpdateCommentDto dto) {
@@ -111,7 +110,14 @@ public class PrivateController {
 
     @GetMapping("/users/{userId}/comments")
     public ResponseEntity<Object> getCommentsByUserId(@PositiveOrZero @PathVariable Long userId) {
-        log.info("Получение комментарией для пользователя id {}", userId);
+        log.info("Получение комментариев для пользователя id {}", userId);
         return new ResponseEntity<>(commentService.getAllForUser(userId), HttpStatus.OK);
+    }
+
+    @GetMapping("/users/{userId}/comments/{commentId}")
+    public ResponseEntity<Object> getCommentByIdForUser(@PositiveOrZero @PathVariable Long userId,
+                                                        @PositiveOrZero @PathVariable Long commentId) {
+        log.info("Получен запрос на получение информации о комментарии {} для пользователя {}", commentId, userId);
+        return new ResponseEntity<>(commentService.getCommentByIdForUser(userId, commentId), HttpStatus.OK);
     }
 }
