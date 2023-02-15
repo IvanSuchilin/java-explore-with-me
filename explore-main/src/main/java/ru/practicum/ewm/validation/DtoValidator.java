@@ -25,7 +25,7 @@ public class DtoValidator {
     LocalDateTime time = LocalDateTime.now();
 
     public void validateNewCommentDto(NewCommentDto newCommentDto) {
-        if (newCommentDto.getText() == null || newCommentDto.getText().isEmpty()) {
+        if (StringUtils.isBlank(newCommentDto.getText())) {
             throw new RequestValidationException(
                     "Не указан текст комментария",
                     "Комментарий пуст",
@@ -35,7 +35,7 @@ public class DtoValidator {
     }
 
     public void validateUpdCommentDto(UpdateCommentDto updateCommentDto) {
-        if (updateCommentDto.getText() == null || updateCommentDto.getText().isEmpty()) {
+        if (StringUtils.isBlank(updateCommentDto.getText())) {
             throw new RequestValidationException(
                     "Не указан текст комментария",
                     "Комментарий пуст",
