@@ -57,7 +57,7 @@ public class CommentService {
         Comment stored = commentRepository.findById(commentId).orElseThrow(() ->
                 new NotFoundException("Комментарий с id" + commentId + "не найден",
                         "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
-        if (!Objects.equals(commentator.getId(), stored.getId())) {
+        if (!Objects.equals(commentator.getId(), stored.getUser().getId())) {
             throw new NotFoundException("Удалять комментарий может автор или администратор",
                     "Пользователь не автор", LocalDateTime.now());
         }
