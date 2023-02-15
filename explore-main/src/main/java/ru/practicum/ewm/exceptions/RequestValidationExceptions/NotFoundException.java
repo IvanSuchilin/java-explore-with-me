@@ -6,16 +6,10 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDateTime;
 
 @Getter
-public class NotFoundException extends RuntimeException {
-    private final String message;
-    private final String reason;
-    private final HttpStatus status;
-    private final LocalDateTime timestamp;
+public class NotFoundException extends BaseException {
+    private final HttpStatus status = HttpStatus.NOT_FOUND;
 
     public NotFoundException(String massage, String reason, LocalDateTime timestamp) {
-        this.status = HttpStatus.NOT_FOUND;
-        this.reason = reason;
-        this.message = massage;
-        this.timestamp = timestamp;
+        super(massage, reason, timestamp);
     }
 }

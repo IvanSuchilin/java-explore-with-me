@@ -126,19 +126,15 @@ public class CompilationService {
                 .stream()
                 .map(EventMapper.INSTANCE::toEventFullDto)
                 .collect(Collectors.toList());
-        List<EventFullDto> eventFullDtoListWithViews = eventFullDtoList
+        List<EventDtoForCompilation> eventFullDtoListWithViews = eventFullDtoList
                 .stream()
                 .map(this::preparingFullDtoWithStat)
                 .collect(Collectors.toList());
-        List<EventDtoForCompilation> eventCompilationDtoListWithViews = eventFullDtoListWithViews
-                .stream()
-                .map(EventMapper.INSTANCE::toCompilationDtoFromFull)
-                .collect(Collectors.toList());
-        return new CompilationDto(eventCompilationDtoListWithViews, compilation.getId(),
+        return new CompilationDto(eventFullDtoListWithViews, compilation.getId(),
                 compilation.isPinned(), compilation.getTitle());
     }
 
-    private EventFullDto preparingFullDtoWithStat(EventFullDto eventFullDto) {
+    private EventDtoForCompilation preparingFullDtoWithStat(EventFullDto eventFullDto) {
         List<StatDto> stat =
                 statClient.getStat(eventFullDto.getCreatedOn().format(returnedTimeFormat),
                         LocalDateTime.now().format(returnedTimeFormat),
@@ -149,6 +145,6 @@ public class CompilationService {
         List<Request> confirmedRequests = requestRepository.findAllByStatusAndAndEvent_Id(Request.RequestStatus.CONFIRMED,
                 eventFullDto.getId());
         eventFullDto.setConfirmedRequests(confirmedRequests.size());
-        return eventFullDto;
+        return EventMapper.INSTANCE.toCompilationDtoFromFull(eventFullDto);
     }
 }

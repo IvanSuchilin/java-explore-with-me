@@ -6,16 +6,10 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDateTime;
 
 @Getter
-public class RequestValidationException extends RuntimeException {
-    private final String message;
-    private final String reason;
-    private final HttpStatus status;
-    private final LocalDateTime timestamp;
+public class RequestValidationException extends BaseException {
+    private final HttpStatus status = HttpStatus.BAD_REQUEST;
 
     public RequestValidationException(String massage, String reason, LocalDateTime timestamp) {
-        this.status = HttpStatus.BAD_REQUEST;
-        this.reason = reason;
-        this.message = massage;
-        this.timestamp = timestamp;
+        super(massage, reason, timestamp);
     }
 }

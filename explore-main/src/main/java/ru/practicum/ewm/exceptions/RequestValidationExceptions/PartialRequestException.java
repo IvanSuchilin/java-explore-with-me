@@ -6,16 +6,10 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDateTime;
 
 @Getter
-public class PartialRequestException extends RuntimeException {
-    private final String message;
-    private final String reason;
-    private final HttpStatus status;
-    private final LocalDateTime timestamp;
+public class PartialRequestException extends BaseException {
+    private final HttpStatus status = HttpStatus.CONFLICT;
 
     public PartialRequestException(String massage, String reason, LocalDateTime timestamp) {
-        this.status = HttpStatus.CONFLICT;
-        this.reason = reason;
-        this.message = massage;
-        this.timestamp = timestamp;
+        super(massage, reason, timestamp);
     }
 }

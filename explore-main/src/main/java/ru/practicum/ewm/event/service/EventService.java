@@ -92,10 +92,8 @@ public class EventService {
             userRepository.findById(userId).orElseThrow(() ->
                     new NotFoundException("Пользователь с id" + userId + "не найден",
                             "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
-            return eventRepository.getOwnerEvents(userId, pageable)
-                    .stream()
-                    .map(EventMapper.INSTANCE::toEventShortDto)
-                    .collect(Collectors.toList());
+            return eventRepository.getOwnerEvents(userId, pageable).stream()
+                    .map(EventMapper.INSTANCE::toEventShortDto).collect(Collectors.toList());
         } catch (RuntimeException runtimeException) {
             throw new RequestValidationException("Не верно составлен запрос",
                     "Ошибка в параметрах запроса", LocalDateTime.now());

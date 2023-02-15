@@ -28,13 +28,13 @@ public class UserService {
         validator.validateUserDto(user);
         log.debug("Получен запрос на создание пользователя {}", user.getName());
         User saveUser;
-        try {
-            saveUser = userRepository.save(UserMapper.INSTANCE.toUser(user));
-        } catch (RuntimeException e) {
-            throw new NameAlreadyExistException("Имя (почта) уже используется", "Не соблюдены условия уникальности имени (почты)",
+        if (userRepository.findAll()
+                .stream()
+                .anyMatch(u -> u.getEmail().equals(user.getEmail()))) {
+            throw new NameAlreadyExistException("Имя уже используется", "Не соблюдены условия уникальности имени",
                     LocalDateTime.now());
         }
-        return UserMapper.INSTANCE.toDto(saveUser);
+        return UserMapper.INSTANCE.toDto(userRepository.save(UserMapper.INSTANCE.toUser(user)));
     }
 
     public void deleteUser(Long id) {

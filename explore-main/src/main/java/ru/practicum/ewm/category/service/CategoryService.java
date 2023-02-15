@@ -30,13 +30,13 @@ public class CategoryService {
         validator.validateCategory(category);
         Category stored;
         log.debug("Получен запрос на создание категории {}", category.getName());
-        try {
-            stored = categoryRepository.save(CategoryMapper.INSTANCE.toCategory(category));
-        } catch (RuntimeException e) {
-            throw new NameAlreadyExistException("Имя категории уже используется", "Не соблюдены условия уникальности имени",
+        if (categoryRepository.findAll()
+                .stream()
+                .anyMatch(c -> c.getName().equals(category.getName()))) {
+            throw new NameAlreadyExistException("Имя уже используется", "Не соблюдены условия уникальности имени",
                     LocalDateTime.now());
         }
-        return CategoryMapper.INSTANCE.toDto(stored);
+        return CategoryMapper.INSTANCE.toDto(categoryRepository.save(CategoryMapper.INSTANCE.toCategory(category)));
     }
 
     public void deleteCategory(Long id) {

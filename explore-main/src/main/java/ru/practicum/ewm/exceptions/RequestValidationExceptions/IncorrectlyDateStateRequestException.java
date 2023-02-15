@@ -6,16 +6,10 @@ import org.springframework.http.HttpStatus;
 import java.time.LocalDateTime;
 
 @Getter
-public class IncorrectlyDateStateRequestException extends RuntimeException {
-    private final String message;
-    private final String reason;
-    private final HttpStatus status;
-    private final LocalDateTime timestamp;
+public class IncorrectlyDateStateRequestException extends BaseException {
+    private final HttpStatus status = HttpStatus.FORBIDDEN;
 
     public IncorrectlyDateStateRequestException(String massage, String reason, LocalDateTime timestamp) {
-        this.status = HttpStatus.FORBIDDEN;
-        this.reason = reason;
-        this.message = massage;
-        this.timestamp = timestamp;
+        super(massage, reason, timestamp);
     }
 }
