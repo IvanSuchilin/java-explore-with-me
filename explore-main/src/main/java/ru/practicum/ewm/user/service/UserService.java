@@ -38,7 +38,7 @@ public class UserService {
     }
 
     public void deleteUser(Long id) {
-        log.debug("Получен запрос DELETE /admin/users/{userId}");
+        log.debug("Получен запрос на удаление пользователя {}", id);
         userRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + id + "не найден", "Запрашиваемый объект не найден или не доступен",
                         LocalDateTime.now()));
@@ -49,7 +49,6 @@ public class UserService {
         Pageable pageable = PageRequest.of(from / size, size);
         if (ids == null || ids.isEmpty()) {
             log.info("Поиск всех пользователей с пагинацией");
-
             return userRepository.findAll(pageable).stream()
                     .map(UserMapper.INSTANCE::toDto)
                     .collect(Collectors.toList());

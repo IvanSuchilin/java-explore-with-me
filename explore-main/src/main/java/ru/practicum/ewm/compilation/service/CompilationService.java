@@ -54,7 +54,6 @@ public class CompilationService {
         this.statClient = new StatClient(url, appName, new RestTemplateBuilder());
     }
 
-
     public void deleteCompilationById(Long compId) {
         log.info("Удаление подборки admin");
         compilationRepository.findById(compId).orElseThrow(() ->
@@ -104,7 +103,9 @@ public class CompilationService {
         }
         return compilationRepository.findAll(Objects.requireNonNull(booleanBuilder.getValue()),
                         pageable).getContent()
-                .stream().map(this::createCompilationDto).collect(Collectors.toList());
+                .stream()
+                .map(this::createCompilationDto)
+                .collect(Collectors.toList());
     }
 
     private Compilation createCompilationForUpdate(Compilation stored, UpdatingCompilationDto updatingCompilationDto) {
@@ -121,12 +122,18 @@ public class CompilationService {
     }
 
     private CompilationDto createCompilationDto(Compilation compilation) {
-        List<EventFullDto> eventFullDtoList = compilation.getEvents().stream().map(EventMapper.INSTANCE::toEventFullDto)
+        List<EventFullDto> eventFullDtoList = compilation.getEvents()
+                .stream()
+                .map(EventMapper.INSTANCE::toEventFullDto)
                 .collect(Collectors.toList());
-        List<EventFullDto> eventFullDtoListWithViews = eventFullDtoList.stream()
-                .map(this::preparingFullDtoWithStat).collect(Collectors.toList());
+        List<EventFullDto> eventFullDtoListWithViews = eventFullDtoList
+                .stream()
+                .map(this::preparingFullDtoWithStat)
+                .collect(Collectors.toList());
         List<EventDtoForCompilation> eventCompilationDtoListWithViews = eventFullDtoListWithViews
-                .stream().map(EventMapper.INSTANCE::toCompilationDtoFromFull).collect(Collectors.toList());
+                .stream()
+                .map(EventMapper.INSTANCE::toCompilationDtoFromFull)
+                .collect(Collectors.toList());
         return new CompilationDto(eventCompilationDtoListWithViews, compilation.getId(),
                 compilation.isPinned(), compilation.getTitle());
     }

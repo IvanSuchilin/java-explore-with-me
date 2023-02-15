@@ -1,6 +1,7 @@
 package ru.practicum.ewm.validation;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.CategoryShortDto;
@@ -77,7 +78,7 @@ public class DtoValidator {
     }
 
     public void validateCategory(CategoryDto category) {
-        if (category.getName() == null || category.getName().isEmpty()) {
+        if (StringUtils.isBlank(category.getName())) {
             throw new RequestValidationException(
                     "Не указано имя категории",
                     "Имя категории пустое",
@@ -87,7 +88,7 @@ public class DtoValidator {
     }
 
     public void validateCategoryForUpd(CategoryShortDto category) {
-        if (category.getName() == null || category.getName().isEmpty()) {
+        if (StringUtils.isBlank(category.getName())) {
             throw new RequestValidationException(
                     "Не указано имя категории",
                     "Имя категории пустое",
@@ -97,7 +98,7 @@ public class DtoValidator {
     }
 
     public void validateUserDto(UserDto user) {
-        if (user.getName() == null || user.getName().isEmpty()) {
+        if (StringUtils.isBlank(user.getName())) {
             throw new RequestValidationException(
                     "Не указано имя пользователя",
                     "Имя пользователя пустое",

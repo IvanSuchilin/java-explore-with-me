@@ -2,6 +2,7 @@ package ru.practicum.ewm.category.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,7 @@ public class CategoryService {
     }
 
     public void deleteCategory(Long id) {
-        log.debug("Получен запрос DELETE /admin/category/{catId}");
+        log.debug("Получен запрос на удаление категории {}", id);
         categoryRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен",
                         LocalDateTime.now()));
@@ -55,24 +56,18 @@ public class CategoryService {
 
     public Object update(Long id, CategoryShortDto updatingDto) {
         validator.validateCategoryForUpd(updatingDto);
-        log.debug("Получен запрос PATCH /admin/category/{catId}");
+        log.debug("Получен запрос обновления категории пользователем с id {}", id);
         Category stored = categoryRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен",
                         LocalDateTime.now()));
-        if (updatingDto.getName() != null || !updatingDto.getName().isBlank()) {
-            if (categoryRepository.findAll().stream()
-                    .anyMatch(u -> u.getName().equals(updatingDto.getName()))) {
-                throw new NameAlreadyExistException("Имя категории уже используется", "Не соблюдены условия уникальности имени",
-                        LocalDateTime.now());
-            }
-        }
+        checkNameForUniq(updatingDto);
         CategoryMapper.INSTANCE.updateCategory(updatingDto, stored);
         Category actualCategory = categoryRepository.save(stored);
         return CategoryMapper.INSTANCE.toDto(actualCategory);
     }
 
     public Object getCategoryById(Long id) {
-        log.debug("Получен запрос GET /categories/{catId}");
+        log.debug("Получен запрос на получение категории {}", id);
         Category stored = categoryRepository.findById(id).orElseThrow(() ->
                 new NotFoundException("Категория с id" + id + "не найдена", "Запрашиваемый объект не найден или не доступен",
                         LocalDateTime.now()));
@@ -82,8 +77,17 @@ public class CategoryService {
     public Object getCategories(int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size);
         log.info("Поиск всех категорий с пагинацией");
-        return categoryRepository.findAll(pageable).stream()
+        return categoryRepository.findAll(pageable)
+                .stream()
                 .map(CategoryMapper.INSTANCE::toDto)
                 .collect(Collectors.toList());
+    }
+
+    private void checkNameForUniq(CategoryShortDto updatingDto) {
+        if (StringUtils.isNotBlank(updatingDto.getName()) && categoryRepository.findAll().stream()
+                .anyMatch(u -> u.getName().equals(updatingDto.getName()))) {
+            throw new NameAlreadyExistException("Имя категории уже используется", "Не соблюдены условия уникальности имени",
+                    LocalDateTime.now());
+        }
     }
 }

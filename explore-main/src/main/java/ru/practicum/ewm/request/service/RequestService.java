@@ -29,47 +29,17 @@ public class RequestService {
     private final RequestRepository requestRepository;
 
     public Object createRequest(long userId, long eventId) {
+        log.debug("Получен запрос на создание запроса на участие пользователя {}", userId);
         Event stored = eventRepository.findById(eventId).orElseThrow(() ->
                 new NotFoundException("Событие с id" + eventId + "не найдено",
                         "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         List<Request> requests = requestRepository.findAllByRequester_IdAndEvent_Id(userId, eventId);
-        if (requests.size() != 0) {
-            throw new PartialRequestException("Попытка повторного запроса",
-                    "Нельзя повторно отправлять запрос на участие", LocalDateTime.now());
-        }
-        if (stored.getInitiator().getId() == userId) {
-            throw new PartialRequestException("Вы инициатор",
-                    "Нельзя ходить на свои мероприятия как гость", LocalDateTime.now());
-        }
-        if (!stored.getState().equals(Event.State.PUBLISHED)) {
-            throw new PartialRequestException("Событие не опубликовано",
-                    "Нельзя подать запрос на неопубликованное событие", LocalDateTime.now());
-        }
-        if (stored.getParticipantLimit() == 0) {
-            throw new PartialRequestException("Мест нет",
-                    "Нет свободных мест в событиии", LocalDateTime.now());
-        }
-
-
-        Request request = new Request();
-        if (!stored.isRequestModeration()) {
-            request.setStatus(Request.RequestStatus.CONFIRMED);
-            stored.setParticipantLimit(stored.getParticipantLimit() - 1);
-            eventRepository.save(stored);
-        } else {
-            request.setStatus(Request.RequestStatus.PENDING);
-        }
-        User requester = userRepository.findById(userId).orElseThrow(() ->
-                new NotFoundException("Пользователь с id" + userId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
-        request.setRequester(requester);
-        request.setEvent(stored);
-        request.setCreated(LocalDateTime.now());
-        Request saved = requestRepository.save(request);
-        return RequestMapper.INSTANCE.toRequestDto(saved);
+        checkRequest(userId, stored, requests);
+        return RequestMapper.INSTANCE.toRequestDto(requestRepository.save(creatingRequest(userId, stored)));
     }
 
     public Object updCancelStatus(Long userId, Long requestId) {
+        log.debug("Получен запрос на изменение статуса запроса на участие пользователя {}", userId);
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
                         "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
@@ -81,11 +51,15 @@ public class RequestService {
     }
 
     public Object getAllRequestsForUser(Long userId) {
+        log.debug("Получение всех запросов пользователя {}", userId);
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
                         "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
         List<Request> storedRequests = requestRepository.findAllByRequesterId(userId);
-        return storedRequests.stream().map(RequestMapper.INSTANCE::toRequestDto).collect(Collectors.toList());
+        return storedRequests
+                .stream()
+                .map(RequestMapper.INSTANCE::toRequestDto)
+                .collect(Collectors.toList());
     }
 
     public Object getAllRequestsByEventId(Long eventId, Long userId) {
@@ -107,10 +81,28 @@ public class RequestService {
         userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
                         "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
-        List<Long> idRequests = dto.getRequestIds();
-        Request.RequestStatus newStatus = dto.getStatus();
+        List<Request> requestsForUpdate = requestRepository.findStoredUpdRequests(eventId, dto.getRequestIds());
+        checkRequestsListForUpdate(dto.getStatus(), storedEvent, requestsForUpdate);
+        eventRepository.save(storedEvent);
+        return createRequestListDto(dto.getRequestIds());
+    }
 
-        List<Request> requestsForUpdate = requestRepository.findStoredUpdRequests(eventId, idRequests);
+    private RequestListDto createRequestListDto(List<Long> idRequests) {
+        List<RequestDto> confirmedRequests = requestRepository.findStoredUpdRequestsWithStatus(Request.RequestStatus.CONFIRMED,
+                idRequests)
+                .stream()
+                .map(RequestMapper.INSTANCE::toRequestDto)
+                .collect(Collectors.toList());
+        List<RequestDto> rejectedRequests = requestRepository.findStoredUpdRequestsWithStatus(Request.RequestStatus.REJECTED,
+                idRequests)
+                .stream()
+                .map(RequestMapper.INSTANCE::toRequestDto)
+                .collect(Collectors.toList());
+        return new RequestListDto(confirmedRequests, rejectedRequests);
+    }
+
+    private void checkRequestsListForUpdate(Request.RequestStatus newStatus,
+                                            Event storedEvent, List<Request> requestsForUpdate) {
         for (Request request : requestsForUpdate) {
             if (storedEvent.getParticipantLimit() == 0) {
                 request.setStatus(Request.RequestStatus.REJECTED);
@@ -132,12 +124,42 @@ public class RequestService {
                 requestRepository.save(request);
             }
         }
-        eventRepository.save(storedEvent);
-        List<RequestDto> confirmedRequests = requestRepository.findStoredUpdRequestsWithStatus(Request.RequestStatus.CONFIRMED,
-                idRequests).stream().map(RequestMapper.INSTANCE::toRequestDto).collect(Collectors.toList());
+    }
 
-        List<RequestDto> rejectedRequests = requestRepository.findStoredUpdRequestsWithStatus(Request.RequestStatus.REJECTED,
-                idRequests).stream().map(RequestMapper.INSTANCE::toRequestDto).collect(Collectors.toList());
-        return new RequestListDto(confirmedRequests, rejectedRequests);
+    private void checkRequest(long userId, Event stored, List<Request> requests) {
+        if (requests.size() != 0) {
+            throw new PartialRequestException("Попытка повторного запроса",
+                    "Нельзя повторно отправлять запрос на участие", LocalDateTime.now());
+        }
+        if (stored.getInitiator().getId() == userId) {
+            throw new PartialRequestException("Вы инициатор",
+                    "Нельзя ходить на свои мероприятия как гость", LocalDateTime.now());
+        }
+        if (!stored.getState().equals(Event.State.PUBLISHED)) {
+            throw new PartialRequestException("Событие не опубликовано",
+                    "Нельзя подать запрос на неопубликованное событие", LocalDateTime.now());
+        }
+        if (stored.getParticipantLimit() == 0) {
+            throw new PartialRequestException("Мест нет",
+                    "Нет свободных мест в событиии", LocalDateTime.now());
+        }
+    }
+
+    private Request creatingRequest(Long userId, Event stored) {
+        Request request = new Request();
+        if (!stored.isRequestModeration()) {
+            request.setStatus(Request.RequestStatus.CONFIRMED);
+            stored.setParticipantLimit(stored.getParticipantLimit() - 1);
+            eventRepository.save(stored);
+        } else {
+            request.setStatus(Request.RequestStatus.PENDING);
+        }
+        User requester = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("Пользователь с id" + userId + "не найден",
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
+        request.setRequester(requester);
+        request.setEvent(stored);
+        request.setCreated(LocalDateTime.now());
+        return request;
     }
 }

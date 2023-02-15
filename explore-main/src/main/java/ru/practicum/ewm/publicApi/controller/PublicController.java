@@ -44,7 +44,6 @@ public class PublicController {
 
     @GetMapping("/events/{id}")
     public ResponseEntity<Object> getEventById(@Positive @PathVariable Long id, HttpServletRequest request) {
-        log.info("client ip: {}", request.getRemoteAddr());
         log.info("endpoint path: {}", request.getRequestURI());
         return new ResponseEntity<>(eventService.getEventById(id, request), HttpStatus.OK);
     }
@@ -60,7 +59,6 @@ public class PublicController {
                                             @RequestParam(required = false, defaultValue = "EVENT_DATE") FilterSort sort,
                                             @PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
                                             @Positive @RequestParam(defaultValue = "10") Integer size, HttpServletRequest request) {
-        log.info("client ip: {}", request.getRemoteAddr());
         log.info("endpoint path: {}", request.getRequestURI());
         return new ResponseEntity<>(eventService.getEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable,
                 sort, from, size, request),
