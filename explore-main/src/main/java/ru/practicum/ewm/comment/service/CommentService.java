@@ -91,13 +91,17 @@ public class CommentService {
 
     public List<CommentDto> getCommentsByEventId(Long eventId) {
         log.info("Получен запрос на получение комментариев для события {}", eventId);
-        return commentRepository.getAllByEventId(eventId).stream().map(CommentMapper.INSTANCE::toCommentDto)
+        return commentRepository.getAllByEventId(eventId)
+                .stream()
+                .map(CommentMapper.INSTANCE::toCommentDto)
                 .collect(Collectors.toList());
     }
 
     public List<CommentDto> getAllForUser(Long userId) {
         log.info("Получен запрос на получение комментариев для пользователя {}", userId);
-        return commentRepository.getAllByUserId(userId).stream().map(CommentMapper.INSTANCE::toCommentDto)
+        return commentRepository.getAllByUserId(userId)
+                .stream()
+                .map(CommentMapper.INSTANCE::toCommentDto)
                 .collect(Collectors.toList());
     }
 

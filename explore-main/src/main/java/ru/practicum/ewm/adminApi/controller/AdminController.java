@@ -140,6 +140,6 @@ public class AdminController {
             @Positive @RequestParam(defaultValue = "10") int size) {
         log.info("Получение всех комментариев администратором");
         return new ResponseEntity<>(commentService.getAll(rangeStart, rangeEnd, from, size),
-        HttpStatus.OK);
+                HttpStatus.OK);
     }
 }

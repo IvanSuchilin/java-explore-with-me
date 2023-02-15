@@ -1,6 +1,7 @@
 package ru.practicum.ewm.validation;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.CategoryShortDto;
@@ -23,7 +24,7 @@ import java.util.Objects;
 public class DtoValidator {
 
     public void validateNewCommentDto(NewCommentDto newCommentDto) {
-        if (newCommentDto.getText() == null || newCommentDto.getText().isEmpty()) {
+        if (StringUtils.isBlank(newCommentDto.getText())) {
             throw new RequestValidationException(
                     "Не указан текст комментария",
                     "Комментарий пуст",
@@ -33,7 +34,7 @@ public class DtoValidator {
     }
 
     public void validateUpdCommentDto(UpdateCommentDto updateCommentDto) {
-        if (updateCommentDto.getText() == null || updateCommentDto.getText().isEmpty()) {
+        if (StringUtils.isBlank(updateCommentDto.getText())) {
             throw new RequestValidationException(
                     "Не указан текст комментария",
                     "Комментарий пуст",
