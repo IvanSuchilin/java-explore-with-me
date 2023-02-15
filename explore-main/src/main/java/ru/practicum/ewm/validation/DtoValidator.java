@@ -122,6 +122,13 @@ public class DtoValidator {
                     LocalDateTime.now()
             );
         }
+        if (StringUtils.isBlank(newEventDto.getAnnotation())) {
+            throw new RequestValidationException(
+                    "Не указана аннотация",
+                    "Поле аннотации пустое",
+                    LocalDateTime.now()
+            );
+        }
     }
 
     public void validateUpdateEventDto(EventUpdateDto eventUpdateDto) {

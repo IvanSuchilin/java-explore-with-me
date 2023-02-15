@@ -3,6 +3,7 @@ package ru.practicum.ewm.category.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,6 @@ public class CategoryService {
 
     public CategoryDto createCategory(CategoryDto category) {
         validator.validateCategory(category);
-        Category stored;
         log.debug("Получен запрос на создание категории {}", category.getName());
         if (categoryRepository.findAll()
                 .stream()
@@ -46,7 +46,7 @@ public class CategoryService {
                         LocalDateTime.now()));
         try {
             categoryRepository.deleteById(id);
-        } catch (RuntimeException e) {
+        } catch (DataIntegrityViolationException e) {
             throw new IncorrectlyDateStateRequestException(
                     "Условия выполнения не соблюдены",
                     "Удалять можно только непривязанную категорию",

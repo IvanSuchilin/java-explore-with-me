@@ -1,6 +1,7 @@
 package ru.practicum.ewm.exceptions;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -44,7 +45,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler({RequestValidationException.class})
+    @ExceptionHandler({RequestValidationException.class, DataIntegrityViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleRequestValidationException(
             final RequestValidationException e

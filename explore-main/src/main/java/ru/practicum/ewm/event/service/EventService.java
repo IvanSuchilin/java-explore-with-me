@@ -70,19 +70,14 @@ public class EventService {
     public Object createEvent(Long userId, NewEventDto newEvent) {
         validator.validateNewEventDto(newEvent);
         log.info("Создание события в категории {}", newEvent.getCategory());
-        try {
-            User initiator = userRepository.findById(userId).orElseThrow(() ->
-                    new NotFoundException("Пользователь с id" + userId + "не найден",
-                            "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
-            Category stored = categoryRepository.findById(newEvent.getCategory()).orElseThrow(() ->
-                    new NotFoundException("Категория с id" + newEvent.getCategory() + "не найдена",
-                            "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
-            Event newEventEntity = creatingNewEvent(newEvent, initiator, stored);
-            return EventMapper.INSTANCE.toEventDto(eventRepository.save(newEventEntity));
-        } catch (RuntimeException runtimeException) {
-            throw new RequestValidationException("Не верно составлен запрос",
-                    "Ошибка в параметрах запроса", LocalDateTime.now());
-        }
+        User initiator = userRepository.findById(userId).orElseThrow(() ->
+                new NotFoundException("Пользователь с id" + userId + "не найден",
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
+        Category stored = categoryRepository.findById(newEvent.getCategory()).orElseThrow(() ->
+                new NotFoundException("Категория с id" + newEvent.getCategory() + "не найдена",
+                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
+        Event newEventEntity = creatingNewEvent(newEvent, initiator, stored);
+        return EventMapper.INSTANCE.toEventDto(eventRepository.save(newEventEntity));
     }
 
     public Object getEventsByUserId(Long userId, int from, int size) {
@@ -110,7 +105,7 @@ public class EventService {
                     new NotFoundException("Событие с id" + eventId + "не найдено",
                             "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
             return EventMapper.INSTANCE.toEventDto(stored);
-        } catch (RuntimeException runtimeException) {
+        } catch (RuntimeException e) {
             throw new RequestValidationException("Не верно составлен запрос",
                     "Ошибка в параметрах запроса",
                     LocalDateTime.now());
