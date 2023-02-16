@@ -1,67 +1,61 @@
 package client;
 
 import dto.EndpointHitDto;
-import org.jetbrains.annotations.Nullable;
+import dto.StatDto;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.DefaultUriBuilderFactory;
 
-import java.util.Collection;
-import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.util.List;
 
-
+@Component
 public class StatClient {
-    protected final RestTemplate rest;
+    private final RestTemplate template;
+    private final String appName;
 
-    public StatClient(RestTemplate rest) {
-        this.rest = rest;
+    public StatClient(@Value("${stat-server.url}") String url,
+                      @Value("${application.name}") String appName,
+                      RestTemplateBuilder template) {
+        this.appName = appName;
+        this.template = template
+                .uriTemplateHandler(new DefaultUriBuilderFactory(url))
+                .build();
     }
 
-    protected ResponseEntity<Object> post(EndpointHitDto body) {
-        return makeAndSendRequest(HttpMethod.POST, "/hit", null, body);
+    public void addHit(HttpServletRequest request) {
+        EndpointHitDto endpointHitDto = new EndpointHitDto(
+                null,
+                "explore-main",
+                request.getRequestURI(),
+                request.getRemoteAddr(),
+                LocalDateTime.now()
+        );
+        template.postForEntity("/hit",
+                new HttpEntity<>(endpointHitDto),
+                EndpointHitDto.class);
     }
 
-    protected ResponseEntity<Object> get(String start, String end, Collection<String> uris, boolean unique) {
-        Map<String, Object> parameters = Map.of(
-                "start", start,
-                "end", end,
-                "uris", uris,
-                "unique", unique);
-        return makeAndSendRequest(HttpMethod.GET, "/stats", parameters, null);
+    public ResponseEntity<List<StatDto>> getStat(String start,
+                                                 String end,
+                                                 List<String> uris,
+                                                 boolean unique) {
+        return template.exchange("/stats?start={start}&end={end}&uris={uris}&unique={unique}",
+                HttpMethod.GET,
+                getHttpEntity(null),
+                new ParameterizedTypeReference<>() {
+                },
+                start, end, uris, unique);
     }
 
-    private ResponseEntity<Object> makeAndSendRequest(HttpMethod method, String path, @Nullable Map<String, Object> parameters,
-                                                      @Nullable EndpointHitDto body) {
-        HttpEntity requestEntity = new HttpEntity<>(body, defaultHeaders());
-
-        ResponseEntity<Object> mainServerResponse;
-        try {
-            if (parameters != null) {
-                mainServerResponse = rest.exchange(path, method, requestEntity, Object.class, parameters);
-            } else {
-                mainServerResponse = rest.exchange(path, method, requestEntity, Object.class);
-            }
-
-        } catch (HttpStatusCodeException e) {
-            return ResponseEntity.status(e.getStatusCode()).body(e.getResponseBodyAsByteArray());
-        }
-        return prepareGatewayResponse(mainServerResponse);
-    }
-
-    private HttpHeaders defaultHeaders() {
+    private <T> HttpEntity<T> getHttpEntity(T dto) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        return headers;
-    }
-
-    private static ResponseEntity<Object> prepareGatewayResponse(ResponseEntity<Object> response) {
-        if (response.getStatusCode().is2xxSuccessful()) {
-            return response;
-        }
-        ResponseEntity.BodyBuilder responseBuilder = ResponseEntity.status(response.getStatusCode());
-        if (response.hasBody()) {
-            return responseBuilder.body(response.getBody());
-        }
-        return responseBuilder.build();
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        return dto == null ? new HttpEntity<>(headers) : new HttpEntity<>(dto, headers);
     }
 }
