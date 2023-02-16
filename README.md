@@ -1,2 +1,1 @@
-# java-explore-with-me
-Template ru.practicum.ewm.stats.repository for ExploreWithMe project.
+https://github.com/IvanSuchilin/java-explore-with-me/pull/4
