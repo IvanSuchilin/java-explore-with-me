@@ -6,7 +6,6 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.factory.Mappers;
 import ru.practicum.ewm.comment.dto.CommentDto;
-import ru.practicum.ewm.comment.dto.NewCommentDto;
 import ru.practicum.ewm.comment.dto.UpdateCommentDto;
 import ru.practicum.ewm.comment.model.Comment;
 import ru.practicum.ewm.event.mappers.EventMapper;
