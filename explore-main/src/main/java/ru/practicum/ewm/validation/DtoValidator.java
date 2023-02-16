@@ -21,6 +21,45 @@ import java.util.Objects;
 @Component
 public class DtoValidator {
     LocalDateTime time = LocalDateTime.now();
+    public void validateNewCommentDto(NewCommentDto newCommentDto) {
+        if (StringUtils.isBlank(newCommentDto.getText())) {
+            throw new RequestValidationException(
+                    "Не указан текст комментария",
+                    "Комментарий пуст",
+                    LocalDateTime.now()
+            );
+        }
+    }
+
+    public void validateUpdCommentDto(UpdateCommentDto updateCommentDto) {
+        if (StringUtils.isBlank(updateCommentDto.getText())) {
+            throw new RequestValidationException(
+                    "Не указан текст комментария",
+                    "Комментарий пуст",
+                    LocalDateTime.now()
+            );
+        }
+    }
+
+    public void validateNewCommentDto(NewCommentDto newCommentDto) {
+        if (StringUtils.isBlank(newCommentDto.getText())) {
+            throw new RequestValidationException(
+                    "Не указан текст комментария",
+                    "Комментарий пуст",
+                    LocalDateTime.now()
+            );
+        }
+    }
+
+    public void validateUpdCommentDto(UpdateCommentDto updateCommentDto) {
+        if (StringUtils.isBlank(updateCommentDto.getText())) {
+            throw new RequestValidationException(
+                    "Не указан текст комментария",
+                    "Комментарий пуст",
+                    LocalDateTime.now()
+            );
+        }
+    }
 
     public void updValidationDtoForAdmin(Event stored, EventUpdateAdminDto eventUpdateAdminDto) {
         if (!Objects.equals(Event.State.PENDING, stored.getState())) {
