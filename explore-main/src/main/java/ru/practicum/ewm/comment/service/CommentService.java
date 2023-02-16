@@ -36,7 +36,7 @@ public class CommentService {
     private final UserRepository userRepository;
     private final DtoValidator validator;
 
-    public Object createComment(Long userId, NewCommentDto newCommentDto) {
+    public CommentDto createComment(Long userId, NewCommentDto newCommentDto) {
         log.info("Получен запрос на создание комментария для события id {}", newCommentDto.getEventId());
         User commentator = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
