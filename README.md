@@ -1,2 +1,2 @@
 # java-explore-with-me
-Template repository for ExploreWithMe project.
+Template ru.practicum.ewm.stats.repository for ExploreWithMe project.
