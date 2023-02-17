@@ -224,6 +224,53 @@
 			"response": []
 		},
 		{
+			"name": "Events publication",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Код ответа 200\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n            \"annotation\": \"Just fun\",\r\n            \"category\": 1,\r\n            \"description\": \"It's your life\",\r\n            \"eventDate\": \"2023-10-10 12:00:00\",\r\n            \"location\": {\r\n                \"lat\": 11.3499,\r\n                \"lon\": 142.19978\r\n            },\r\n            \"paid\": false,\r\n            \"participantLimit\": 999,\r\n            \"requestModeration\": false,\r\n            \"title\": \"Let's do it\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/admin/events/:eventId",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"admin",
+						"events",
+						":eventId"
+					],
+					"variable": [
+						{
+							"key": "eventId",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Add Comment",
 			"event": [
 				{

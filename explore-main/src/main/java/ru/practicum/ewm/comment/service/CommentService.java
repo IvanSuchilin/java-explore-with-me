@@ -18,6 +18,7 @@ import ru.practicum.ewm.comment.repository.CommentRepository;
 import ru.practicum.ewm.event.model.Event;
 import ru.practicum.ewm.event.repository.EventRepository;
 import ru.practicum.ewm.exceptions.RequestValidationExceptions.NotFoundException;
+import ru.practicum.ewm.exceptions.RequestValidationExceptions.RequestValidationException;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
 import ru.practicum.ewm.validation.DtoValidator;
@@ -36,53 +37,62 @@ public class CommentService {
     private final UserRepository userRepository;
     private final DtoValidator validator;
 
+    LocalDateTime time = LocalDateTime.now();
+
+
     public CommentDto createComment(Long userId, NewCommentDto newCommentDto) {
-        log.info("Получен запрос на создание комментария для события id {}", newCommentDto.getEventId());
+        log.info("Создание комментария пользователем {}", userId);
         User commentator = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", time));
+        validator.validateNewCommentDto(newCommentDto);
         Event stored = eventRepository.findById(newCommentDto.getEventId()).orElseThrow(() ->
                 new NotFoundException("Событие с id" + newCommentDto.getEventId() + "не найдено",
-                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
-        validator.validateNewCommentDto(newCommentDto);
-        Comment newComment = new Comment(null, newCommentDto.getText(), commentator, stored, LocalDateTime.now());
+                        "Запрашиваемый объект не найден или не доступен", time));
+        if (!stored.getState().equals(Event.State.PUBLISHED)) {
+            throw new RequestValidationException(
+                    "Событие не опубликовано",
+                    "Можно комментировать опубликованные события",
+                    time);
+        }
+        Comment newComment = new Comment(null, newCommentDto.getText(), commentator, stored, time);
         return CommentMapper.INSTANCE.toCommentDto(commentRepository.save(newComment));
     }
 
     public void deleteCommentByIdByOwner(Long userId, Long commentId) {
-        log.info("Получен запрос на удаление комментария {}", commentId);
+        log.info("Получен запрос на удаление комментария автором {}", commentId);
         User commentator = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", time));
         Comment stored = commentRepository.findById(commentId).orElseThrow(() ->
                 new NotFoundException("Комментарий с id" + commentId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", time));
         if (!Objects.equals(commentator.getId(), stored.getUser().getId())) {
             throw new NotFoundException("Удалять комментарий может автор или администратор",
-                    "Пользователь не автор", LocalDateTime.now());
+                    "Пользователь не автор", time);
         }
         commentRepository.deleteById(commentId);
     }
 
     public void deleteCommentByIdByAdmin(Long commentId) {
-        log.info("Получен запрос на удаление комментария администратором{}", commentId);
+        log.info("Получен запрос на удаление комментария администратором {}", commentId);
         commentRepository.findById(commentId).orElseThrow(() ->
                 new NotFoundException("Комментарий с id" + commentId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", time));
         commentRepository.deleteById(commentId);
     }
 
     public Object updateCommentForEvent(Long commentId, Long userId, UpdateCommentDto dto) {
-        log.info("Получен запрос на обновление комментария {}", commentId);
+        log.info("Получен запрос на обновление комментария автором {}", commentId);
         User commentator = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", time));
         Comment stored = commentRepository.findById(commentId).orElseThrow(() ->
                 new NotFoundException("Комментарий с id" + commentId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", time));
         if (!Objects.equals(commentator.getId(), stored.getUser().getId())) {
             throw new NotFoundException("Обновлять комментарий может только автор",
-                    "Пользователь не автор", LocalDateTime.now());
+                    "Пользователь не автор", time);
         }
         validator.validateUpdCommentDto(dto);
         Comment updComment = CommentMapper.INSTANCE.updateComment(dto, stored);
@@ -90,7 +100,7 @@ public class CommentService {
     }
 
     public List<CommentDto> getCommentsByEventId(Long eventId) {
-        log.info("Получен запрос на получение комментариев для события {}", eventId);
+        log.info("Получен запрос на получение комментариев для события пользователем {}", eventId);
         return commentRepository.getAllByEventId(eventId)
                 .stream()
                 .map(CommentMapper.INSTANCE::toCommentDto)
@@ -109,13 +119,13 @@ public class CommentService {
         log.info("Получен запрос на получение информации о комментарии {} для пользователя {}", commentId, userId);
         User commentator = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException("Пользователь с id" + userId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", time));
         Comment stored = commentRepository.findById(commentId).orElseThrow(() ->
                 new NotFoundException("Комментарий с id" + commentId + "не найден",
-                        "Запрашиваемый объект не найден или не доступен", LocalDateTime.now()));
+                        "Запрашиваемый объект не найден или не доступен", time));
         if (!Objects.equals(commentator.getId(), stored.getUser().getId())) {
             throw new NotFoundException("Получить информацию о комментарии может только автор",
-                    "Пользователь не автор", LocalDateTime.now());
+                    "Пользователь не автор", time);
         }
         return CommentMapper.INSTANCE.toCommentDto(stored);
     }
@@ -141,7 +151,7 @@ public class CommentService {
             booleanBuilder.and(qComment.createdOn.before(rangeEnd));
         }
         if (rangeStart == null) {
-            booleanBuilder.and(qComment.createdOn.after(LocalDateTime.now()));
+            booleanBuilder.and(qComment.createdOn.after(time));
         }
         return booleanBuilder;
     }
