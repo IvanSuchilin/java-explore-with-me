@@ -5,6 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.CategoryShortDto;
+import ru.practicum.ewm.comment.dto.NewCommentDto;
+import ru.practicum.ewm.comment.dto.UpdateCommentDto;
 import ru.practicum.ewm.event.dto.EventUpdateAdminDto;
 import ru.practicum.ewm.event.dto.EventUpdateDto;
 import ru.practicum.ewm.event.dto.NewEventDto;
@@ -21,6 +23,26 @@ import java.util.Objects;
 @Component
 public class DtoValidator {
     LocalDateTime time = LocalDateTime.now();
+
+    public void validateNewCommentDto(NewCommentDto newCommentDto) {
+        if (StringUtils.isBlank(newCommentDto.getText())) {
+            throw new RequestValidationException(
+                    "Не указан текст комментария",
+                    "Комментарий пуст",
+                    LocalDateTime.now()
+            );
+        }
+    }
+
+    public void validateUpdCommentDto(UpdateCommentDto updateCommentDto) {
+        if (StringUtils.isBlank(updateCommentDto.getText())) {
+            throw new RequestValidationException(
+                    "Не указан текст комментария",
+                    "Комментарий пуст",
+                    LocalDateTime.now()
+            );
+        }
+    }
 
     public void updValidationDtoForAdmin(Event stored, EventUpdateAdminDto eventUpdateAdminDto) {
         if (!Objects.equals(Event.State.PENDING, stored.getState())) {
